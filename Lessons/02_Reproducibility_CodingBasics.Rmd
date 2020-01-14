@@ -229,6 +229,7 @@ recipe6 <- function(x){
   ifelse(x<3, x*2, x/2)
   
 }
+#xample
 
 meal4 <- recipe6(4); meal4
 meal5 <- recipe6(2); meal5
