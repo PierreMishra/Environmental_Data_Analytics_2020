@@ -28,7 +28,7 @@ R treats objects differently based on their characteristics. For more informatio
 
 Define what each new piece of syntax does below (i.e., fill in blank comments). Note that the R chunk has been divided into sections (# at beginning of line, ---- at end)
 ```{r}
-# Vectors ----
+# Vectors ----  
 vector1 <- c(1,2,5.3,6,-2,4) # numeric vector
 vector1
 vector2 <- c("one","two","three") # character vector
@@ -36,78 +36,82 @@ vector2
 vector3 <- c(TRUE,TRUE,TRUE,FALSE,TRUE,FALSE) #logical vector
 vector3
 
-vector1[3] # 
+vector1[3] # It picks the third value from vector 1.Square brackets call 'matrix subsetting'.
 
 # Matrices ----
-matrix1 <- matrix(1:20, nrow = 5,ncol = 4) # 
+matrix1 <- matrix(1:20, nrow = 5,ncol = 4) # entered values 1-20 by column (vertically)
 matrix1
-matrix2 <- matrix(1:20, nrow = 5, ncol = 4, byrow = TRUE) #
+matrix2 <- matrix(1:20, nrow = 5, ncol = 4, byrow = TRUE) #entered values 1-20 by row (horizontally)
 matrix2
 matrix3 <- matrix(1:20, nrow = 5, ncol = 4, byrow = TRUE, # return after comma continues the line
                   dimnames = list(c("uno", "dos", "tres", "cuatro", "cinco"), 
                                   c("un", "deux", "trois", "cat"))) #
 
-matrix1[4, ] #
-matrix1[ , 3] #
-matrix1[c(12, 14)] #
-matrix1[c(12:14)] #
-matrix1[2:4, 1:3] #
+matrix3
+matrix1[4, ] # it calls 4th row all columns
+matrix1[ , 3] # it calls all rows of 3rd colum
+matrix1[c(12, 14)] # calls the values at positions 12 and 14. R counts vertically. Specifying specific objects in matrix.
+matrix1[c(12:14)] # calls values 12 through 14
+matrix1[2:4, 1:3] # calls rows 2 to 4 and columns 1 to 3
 
 cells <- c(1, 26, 24, 68)
 rnames <- c("R1", "R2")
 cnames <- c("C1", "C2") 
 matrix4 <- matrix(cells, nrow = 2, ncol = 2, byrow = TRUE,
-  dimnames = list(rnames, cnames)) # 
+  dimnames = list(rnames, cnames)) # pretty good :) . Matrices should be of one type of values.
 matrix4
 
 # Lists ---- 
-list1 <- list(name = "Maria", mynumbers = vector1, mymatrix = matrix1, age = 5.3); list1
+list1 <- list(name = "Maria", mynumbers = vector1, mymatrix = matrix1, age = 5.3); list1 # semicolon allows us to use one keystroke to run both the codes. List allows us to store different types of values and different sizes.
 list1[[2]]
 
 # Data Frames ----
-d <- c(1, 2, 3, 4) # What type of vector?
-e <- c("red", "white", "red", NA) # What type of vector?
-f <- c(TRUE, TRUE, TRUE, FALSE) # What type of vector?
-dataframe1 <- data.frame(d,e,f) #
-names(dataframe1) <- c("ID","Color","Passed"); View(dataframe1) # 
+d <- c(1, 2, 3, 4) # What type of vector? Numeric
+e <- c("red", "white", "red", NA) # What type of vector? Character. She added 'NA' to match the number of rows/columns. If you look at the dataframe window it changed to factor type of column
+f <- c(TRUE, TRUE, TRUE, FALSE) # What type of vector? Logical 
+dataframe1 <- data.frame(d,e,f) # Way to create a dataframe. Notice that in the 'Environment' window, dataframe, list and matrix are under 'data' and values are under 'values'
+names(dataframe1) <- c("ID","Color","Passed"); View(dataframe1) # to change column headers
 
 dataframe1[1:2,] # 
-dataframe1[c("ID","Passed")] # 
+dataframe1[c("ID","Passed")] # concatenate those specific columns
 dataframe1$ID
 
 ```
 Question: How do the different types of data appear in the Environment tab?
 
-> Answer: 
+> Answer: matrix, dataframe and list are under 'Data' while values are under 'values'
 
 Question: In the R chunk below, write "dataframe1$". Press `tab` after you type the dollar sign. What happens?
 
-> Answer: 
+> Answer: We get a drop down value of all possible columns in that dataframes.
 
 ### Coding challenge
 
 Find a ten-day forecast of temperatures (Fahrenheit) for Durham, North Carolina. Create two vectors, one representing the high temperature on each of the ten days and one representing the low.
 
 ```{r}
-
+max_temp_f <- c(62,45,50,50,40,40,45,52,54,58)
+min_temp_f <- c(31,29,43,24,23,23,26,30,42,41)
 ```
 
 Now, create two additional vectors that include the ten-day forecast for the high and low temperatures in Celsius.
 
 ```{r}
-
+max_temp_c <- 5/9 * (max_temp-32)
+min_temp_c <- 5/9 * (min_temp-32)
 ```
 
 Combine your four vectors into a data frame and add informative column names.
 
 ```{r}
-
+forecast_10_days <- data.frame (max_temp_f, min_temp_f, max_temp_c, min_temp_c)
 ```
 
 Use the common functions `summary` and `sd` to obtain basic data summaries of the ten-day forecast. How would you call these functions differently for the entire data frame vs. a single column? Attempt to demonstrate both options below.
 
 ```{r}
-
+summary(forecast_10_days)
+sd(forecast_10_days$max_temp_c)
 ```
 
 
@@ -130,21 +134,21 @@ If a package is already installed, you will need to load it every session. You c
 
 ```{r}
 # We will use the packages dplyr and ggplot2 regularly. 
-#install.packages("dplyr") 
-#install.packages("ggplot2")
+install.packages("dplyr") 
+install.packages("ggplot2")
 # comment out install commands, use only when needed and re-comment
 
 library(dplyr)
 library(ggplot2)
 
 # Some packages are umbrellas under which other packages are loaded
-#install.packages("tidyverse")
+install.packages("tidyverse")
 library(tidyverse)
 ```
 
 Question: What happens in the console when you load a package?
 
-> Answer: 
+> Answer: It is ready to use
 
 
 ## Tips and Tricks
