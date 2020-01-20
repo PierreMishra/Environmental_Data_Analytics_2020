@@ -1,6 +1,6 @@
 ---
 title: "Assignment 2: Coding Basics"
-author: "Student Name"
+author: "Pierre Mishra"
 output: pdf_document
 geometry: margin=2.54cm
 editor_options: 
@@ -33,11 +33,14 @@ The completed exercise is due on Tuesday, January 21 at 1:00 pm.
 
 ```{r}
 #1. 
+four_seq <- seq(1,100,4) #Using the function "seq" to generate numbers from 1 to 100 and stepping the values by 4
 
 #2. 
+mean <- mean(four_multi)      # Calculating mean of the sequence generated
+median <- median(four_multi)  # Calculating median of the sequence 
 
 #3. 
-
+mean > median # Comparing mean and median. It returns FALSE meaning mean is not greater than median
 ```
 
 ## Basics Day 2
@@ -51,21 +54,41 @@ The completed exercise is due on Tuesday, January 21 at 1:00 pm.
 8. Label the columns of your data frame with informative titles.
 
 ```{r}
-
+name <- c("John Cena", "Michael Scott", "Tom Haverford") # It is a character vector
+score <- c(89, 45, 96) # It is an integer vector
+result <- score > 49 # It is a logical vector
+stud_info <- data.frame(name, score, result)
+names(stud_info) <- c("Name", "Score", "Passed")
+stud_info
 ```
 
 9. QUESTION: How is this data frame different from a matrix?
 
-> Answer: 
+> Answer: A dataframe can contain more than one kind of data types while a matrix can have only one type of data.
 
 10. Create a function with an if/else statement. Your function should determine whether a test score is a passing grade of 50 or above (TRUE or FALSE). You will need to choose either the `if` and `else` statements or the `ifelse` statement. Hint: Use `print`, not `return`. The name of your function should be informative.
 
 11. Apply your function to the vector with test scores that you created in number 5. 
 
 ```{r}
+# Creating functions using both 'if' and 'else', and 'ifelse' methods
+pass_nopass <- function(x) {
+  if (x<50) {
+    print (FALSE)
+  }
+  else {
+    print (TRUE)
+  }
+}
 
+p_np <- function (x) {
+  ifelse (x<50, FALSE, TRUE) 
+}
+
+pass_nopass(score) #### This does not work...
+p_np(score)  #### This works!!!
 ```
 
 12. QUESTION: Which option of `if` and `else` vs. `ifelse` worked? Why?
 
-> Answer: 
+> Answer: The `ifeslse` method worked. This is because in the `if` and `else` method, the two conditions are separately defined. As soon as the 1st value matces anyone of the conditions, the code ends. On the other hand, `ifelse` is a vectorized form of indexing values. The arguments for`ifelse` are in a single step which allows for multiple values to pass through `ifelse`. 
