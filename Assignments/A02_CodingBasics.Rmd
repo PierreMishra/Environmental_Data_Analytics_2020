@@ -36,7 +36,7 @@ The completed exercise is due on Tuesday, January 21 at 1:00 pm.
 four_seq <- seq(1,100,4) #Using the function "seq" to generate numbers from 1 to 100 and stepping the values by 4
 
 #2. 
-mean <- mean(four_multi)      # Calculating mean of the sequence generated
+mean <- mean(four_multi)      # Calculating mean of the sequence generated in previous question
 median <- median(four_multi)  # Calculating median of the sequence 
 
 #3. 
@@ -58,7 +58,7 @@ name <- c("John Cena", "Michael Scott", "Tom Haverford") # It is a character vec
 score <- c(89, 45, 96) # It is an integer vector
 result <- score > 49 # It is a logical vector
 stud_info <- data.frame(name, score, result)
-names(stud_info) <- c("Name", "Score", "Passed")
+names(stud_info) <- c("Student Name", "Exame Score", "Passed?")
 stud_info
 ```
 
