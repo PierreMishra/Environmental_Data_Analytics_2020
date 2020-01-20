@@ -36,8 +36,8 @@ The completed exercise is due on Tuesday, January 21 at 1:00 pm.
 four_seq <- seq(1,100,4) #Using the function "seq" to generate numbers from 1 to 100 and stepping the values by 4
 
 #2. 
-mean <- mean(four_multi)      # Calculating mean of the sequence generated in previous question
-median <- median(four_multi)  # Calculating median of the sequence 
+mean <- mean(four_seq)      # Calculating mean of the sequence generated in previous question
+median <- median(four_seq)  # Calculating median of the sequence 
 
 #3. 
 mean > median # Comparing mean and median. It returns FALSE meaning mean is not greater than median
