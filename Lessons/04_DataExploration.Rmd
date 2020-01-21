@@ -26,7 +26,7 @@ In this course, we will always open the R project file for the course, and addit
 ```{r}
 # Working directory should be set to the parent folder for the Environmental Data Analytics Course, i.e., the folder that houses the R Project file.
 
-getwd()
+getwd() #whenevr you start working on a project, it is good ides to verufuy working directory
 ```
 
 If your working directory is not set to the folder you want, you have several options. The first is to directly code your working directory. You may do this by defining an absolute file path (below). What are the pitfalls of using an absolute file path?
@@ -34,6 +34,8 @@ If your working directory is not set to the folder you want, you have several op
 ```{r}
 # Absolute file path is commented out
 #setwd("/Users/katerisalk/Documents/Duke/Courses/Environmental_Data_Analytics")
+#### you can also set working directory from 'sessions' option (above)
+#### write comment like the one written here on line 35
 ```
 
 You may change your working directory without coding by going to the Session menu in RStudio and navigating to the Set Working Directory tab. From there, you may select from a series of options to reset your working directory. 
@@ -46,7 +48,8 @@ At the top of your R scripts, you should load any packages that need to be used 
 
 At the same time, you should also load your theme if you are doing any data visualization with ggplot. More on this later.
 
-```{r, message = FALSE}
+```{r, message = FALSE} 
+#### she did `message = FALSE` so when you knit, it doesnt print this and prevent any knitting errors. NICE!
 # Load package
 library(tidyverse)
 ```
@@ -64,27 +67,30 @@ You may also import datasets from the Files tab, but this is not recommended sin
 #read.csv("/Users/katerisalk/Documents/Duke/Courses/Environmental_Data_Analytics/Data/Raw/USGS_Site02085000_Flow_Raw.csv")
 
 # Relative file path (friendly for users regardless of machine)
-USGS.flow.data <- read.csv("./Data/Raw/USGS_Site02085000_Flow_Raw.csv")
+USGS.flow.data <- read.csv("./Data/Raw/USGS_Site02085000_Flow_Raw.csv") #### '.' in beginning means go 1 folder in
+#### '..' 2 dots in beginning mean go out 1 folder and then go in to what we are writing.
+#### '~' also has some option. but kateri doesnt know so dont worry about it
 
 # What happens if we don't assign a name to our imported dataset?
-#read.csv("../Data/Raw/USGS_Site02085000_Flow_Raw.csv")
+#read.csv("../Data/Raw/USGS_Site02085000_Flow_Raw.csv") #### DONT DO IT THIS WAY
 
 # Another option is to choose with your browser
-# read.csv(file.choose())
+# read.csv(file.choose()) #### THIS IS ALSO NOT REPRODUCIBLE!
 
 # To import .txt files, use read.table rather than read.csv
-#read.table()
+#read.table() #### This is what Luana (TSA professor) uses
 
 ```
 
 ## EXPLORE YOUR DATASET
 
 Take a moment to read through the README file associated with the USGS dataset on discharge at the Eno River. Where can you find this file? How does the placement and information found in this file relate to the best practices for reproducible data analysis?
-> ANSWER: 
+> ANSWER: It is good to hav some consistent form of naming conventions. Return back to the readme files often.
 
 ```{r}
 View(USGS.flow.data)
 # Alternate option: click on data frame in Environment tab
+#### to empty 'Environment' on the right, click on the broom looking icon.
 
 class(USGS.flow.data)
 colnames(USGS.flow.data)
@@ -97,16 +103,20 @@ colnames(USGS.flow.data) <- c("agency_cd", "site_no", "datetime",
                               "gage.height.max", "gage.height.max.approval", 
                               "gage.height.min", "gage.height.min.approval", 
                               "gage.height.mean", "gage.height.mean.approval")
-str(USGS.flow.data)
+# If you would want to rename only 1 or a few of the column names, use this below:
+colnames(USGS.flow.data)[1] <- "agency"
+
+str(USGS.flow.data) #### structure of our dataframes. it's like a little summary of datatypes
+#### whatever is NA was an empty cell in real excel file
 dim(USGS.flow.data)
-length(USGS.flow.data)
+length(USGS.flow.data) #### number of columns, you can use 'nrow' for number of rows
 
 head(USGS.flow.data)
 head(USGS.flow.data, 10)
 tail(USGS.flow.data, 5)
-USGS.flow.data[30000:30005, c(3, 8, 14)]
+USGS.flow.data[30000:30005, c(3, 8, 14)] #### thats a way to do in matrix subsetting
 
-class(USGS.flow.data$datetime)
+class(USGS.flow.data$datetime) #### it is factor, but we know it is a date
 class(USGS.flow.data$discharge.mean)
 class(USGS.flow.data$gage.height.mean)
 
@@ -115,7 +125,7 @@ summary(USGS.flow.data)
 ```
 
 What happened to blank cells in the spreadsheet when they were imported into R?
-> Answer: 
+> Answer: if it is a numeric value and blank it will be NA, if it is factor or char it will be blank
 
 ## Adjusting Datasets
 
@@ -132,7 +142,7 @@ Question: What types of research questions might make it favorable to remove NAs
 > Answer: 
 
 ```{r}
-USGS.flow.data.complete <- na.omit(USGS.flow.data)
+USGS.flow.data.complete <- na.omit(USGS.flow.data) #### it takes out any row that contains NA just once
 dim(USGS.flow.data)
 dim(USGS.flow.data.complete)
 
@@ -150,14 +160,14 @@ Formatting of dates in R:
 
 %d  day as number (0-31)
 %m  month (00-12, can be e.g., 01 or 1)
-%y  2-digit year
-%Y  4-digit year
+%y  2-digit year #### lowercase y
+%Y  4-digit year #### uppercase Y
 %a  abbreviated weekday
 %A  unabbreviated weekday
 %b  abbreviated month
 %B  unabbreviated month
 
-In some cases when dates are provided as integers, you may need to provide an origin for your dates. Beware: the "origin" date for Excel (Windows), Excel (Mac), R, and MATLAB all have different origin dates. Google this if it comes up.
+In some cases when dates are provided as integers, you may need to provide an origin for your dates. Beware: the "origin" date for Excel (Windows), Excel (Mac), R, and MATLAB all have different origin dates. Google this if it comes up. #### jan 1 1970 in R
 
 ```{r}
 help(as.Date)
@@ -168,11 +178,12 @@ help(as.Date)
 # (code must be uncommented)
 today <- Sys.Date()
 format(today, format = "%B")
-#format(today, format = "")
-#format(today, format = "")
-#format(today, format = "")
+format(today, format = "%a")
+format(today, format = "%m")
+format(today, format = "%d") #### because it is in date format, R can extract all the info for that day, like week
 
-USGS.flow.data$datetime <- as.Date(USGS.flow.data$datetime, format = "%m/%d/%y") 
+USGS.flow.data$datetime <- as.Date(USGS.flow.data$datetime, format = "%m/%d/%y") #### format is watever format is in your data
+#### Now if you look at your data, it is formatted in the global format of year-month-date
 ```
 
 Note that for every date prior to 1969, R has assigned the date in the 2000s rather than the 1900s. This can be fixed with an `ifelse` statement inside a function. Run through the code below and write what is happening in the comment above each line.
