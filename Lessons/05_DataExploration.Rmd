@@ -18,6 +18,7 @@ editor_options:
 ## Opening discussion: why do we explore our data?
 
 Why is data exploration our first step in analyzing a dataset? What information do we gain? How does data exploration aid in our decision-making for data analysis steps further down the pipeline?
+#### If you have strange patterns, need for data cleaning, what data you have and what can you answer, which statistical analysis and modelling
 
 ## Import data and view summaries
 
@@ -31,11 +32,11 @@ library(tidyverse)
 # 3. Import datasets
 USGS.flow.data <- read.csv("./Data/Processed/USGS_Site02085000_Flow_Processed.csv")
 
-#View(USGS.flow.data)
+#View(USGS.flow.data) ####it is commented because otherwise when we will knit, it will appear in our pdf
 # Alternate option: click on data frame in Environment tab
 
 colnames(USGS.flow.data)
-str(USGS.flow.data)
+str(USGS.flow.data) #### structure
 dim(USGS.flow.data)
 
 # Check our date column
@@ -44,6 +45,7 @@ class(USGS.flow.data$datetime)
 USGS.flow.data$datetime <- as.Date(USGS.flow.data$datetime, format = "%Y-%m-%d") 
 class(USGS.flow.data$datetime)
 
+USGS.flow.data$datetime[1:100] #### Just checking for my own sake
 ```
 
 
@@ -58,8 +60,10 @@ Note: each of these approaches utilize the package "ggplot2". We will be coverin
 Visualize count data for categorical variables. 
 
 ```{r, fig.height = 3, fig.width = 4}
+#### bar cart to visualize count of things
 ggplot(USGS.flow.data, aes(x = discharge.mean.approval)) +
   geom_bar()
+#### we have 4 different factor levels. We just want to see if they re approved(A) or provisional(P) but we have 4 factors. We can see that most of the discarge mean are approved.
 ```
 
 ### Histogram (function: geom_histogram)
@@ -69,24 +73,26 @@ Visualize distributions of values for continuous numerical variables. What is ha
 ```{r, fig.height = 3, fig.width = 4}
 #
 ggplot(USGS.flow.data) +
-  geom_histogram(aes(x = discharge.mean))
+  geom_histogram(aes(x = discharge.mean)) #### Our x-axis is so big
 
 #
 ggplot(USGS.flow.data) +
-  geom_histogram(aes(x = discharge.mean), binwidth = 10)
+  geom_histogram(aes(x = discharge.mean), binwidth = 10) #### changing the width of each bin
 
 #
 ggplot(USGS.flow.data) +
-  geom_histogram(aes(x = discharge.mean), bins = 20)
+  geom_histogram(aes(x = discharge.mean), bins = 20) #### changed total number of bins. Now our counts increase for each bin
 
 #
 ggplot(USGS.flow.data, aes(x = discharge.mean)) +
   geom_histogram(binwidth = 10) + 
-  scale_x_continuous(limits = c(0, 500))
+  scale_x_continuous(limits = c(0, 500)) #### changing x-scale limits. We concatenated with a list of numbers with 'c'
   
 #
-ggplot(USGS.flow.data) +
-  geom_histogram(aes(x = gage.height.mean))
+gage_height <- ggplot(USGS.flow.data) +
+  geom_histogram(aes(x = gage.height.mean)) #### now looking at gage height
+
+print(gage_height)
 
 ```
 ### Frequency line graph (function: geom_freqpoly)
@@ -99,13 +105,21 @@ ggplot(USGS.flow.data) +
   geom_freqpoly(aes(x = gage.height.mean), bins = 50) +
   geom_freqpoly(aes(x = gage.height.min), bins = 50, color = "darkgray") +
   geom_freqpoly(aes(x = gage.height.max), bins = 50,  lty = 2) +
-  scale_x_continuous(limits = c(0, 10))
+  scale_x_continuous(limits = c(0, 10)) ##### multiple variables!!! gage height mean, min and max. 'lty' is line type (dash line). Just search ggplot line type on google
+
+length (USGS.flow.data$gage.height.max) #### number of rows
+summary (USGS.flow.data$gage.height.max)
+summary (USGS.flow.data$gage.height.min)
+summary (USGS.flow.data$gage.height.mean)
+#### less NA's in gage height mean
 
 #
 ggplot(USGS.flow.data) +
   geom_freqpoly(aes(x = gage.height.mean, color = gage.height.mean.approval), bins = 50) +
   scale_x_continuous(limits = c(0, 10)) +
   theme(legend.position = "top")
+#### factors of gage height approval column in different colors
+#### other ways are geom density, geom density ridges
 
 ```
 ### Box-and-whisker plots (function: geom_boxplot, geom_violin)
@@ -126,15 +140,17 @@ An alternate option is a violin plot, which displays density distributions, some
 #
 ggplot(USGS.flow.data) +
   geom_boxplot(aes(x = gage.height.mean.approval, y = gage.height.mean))
-
+#### one thing that boxplots are not good at is showing sample sizes. From our boxplot we cant see that Provisional samplesize was very small right
 #
 ggplot(USGS.flow.data) +
   geom_boxplot(aes(x = gage.height.mean, y = discharge.mean, group = cut_width(gage.height.mean, 1)))
-
+#### you dont have to hav factor levels, you can have distribution of data as well. We wont use these as much in this class, but somthig like this is possible.
 #
 ggplot(USGS.flow.data) +
   geom_violin(aes(x = gage.height.mean.approval, y = gage.height.mean), 
-              draw_quantiles = c(0.25, 0.5, 0.75))
+              draw_quantiles = c(0.25, 0.5, 0.75),
+              scale = 'count')
+#### violin charts, it has scaled width of the violin by count. SO now you can see the sample size (scale = 'count'). default is area (scale = 'area')
 ```
 
 ### Scatterplot (function: geom_point)
@@ -142,10 +158,10 @@ Visualize relationships between continuous numerical variables.
 
 ```{r, fig.height = 3, fig.width = 4}
 ggplot(USGS.flow.data) +
-  geom_point(aes(x = discharge.mean, y = gage.height.mean))
+  geom_point(aes(x = discharge.mean, y = gage.height.mean)) #### we just specify what we want in x and y
 
 ggplot(USGS.flow.data) +
-  geom_point(aes(x = datetime, y = discharge.mean))
+  geom_point(aes(x = datetime, y = discharge.mean)) #### notice here we have a big gap from 1970s to 1990s
 ```
 
 Question: under what circumstances would it be beneficial to use each of these graph types (bar plot, histogram, frequency polygon, box-and whisker, violin, scatterplot)?
