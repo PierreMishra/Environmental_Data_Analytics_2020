@@ -162,11 +162,14 @@ Mutating allows us to add new columns that are functions of existing columns. Op
 NTL.phys.data.temps <- mutate(NTL.phys.data.temps, temperature_F = (temperature_C*9/5) + 32)
 NTL.phys.data.temps["hello_F"] <- (NTL.phys.data.temps["temperature_C"] * 9/5) + 32
 #### 2 ways to do the same thing!!!
+
 ```
 
 ## Lubridate
 
 A package that makes coercing date much easier is `lubridate`. A guide to the package can be found at https://lubridate.tidyverse.org/. The cheat sheet within that web page is excellent too. This package can do many things (hint: look into this package if you are having unique date-type issues), but today we will be using two of its functions for our NTL dataset. 
+
+It has a lotttttttttttt of functions for data (example: rounding to nearest week, year etc) :D 
 
 ```{r}
 # add a month column to the dataset
@@ -191,10 +194,11 @@ Sometimes we will want to perform multiple functions on a single dataset on our 
 Let's say we want to take our raw dataset (NTL.phys.data), *then* filter the data for Peter and Paul lakes, *then* select temperature and observation information, and *then* add a column for temperature in Fahrenheit: 
 
 ```{r}
+#### you can do multiple operations 
 NTL.phys.data.processed <- 
-  NTL.phys.data %>%
-  filter(lakename == "Paul Lake" | lakename == "Peter Lake") %>%
-  select(lakename, sampledate:temperature_C) %>%
+  NTL.phys.data %>%  #### %>% is the pipe operator, it kinda means "then" O_O
+  filter(lakename == "Paul Lake" | lakename == "Peter Lake") %>% ### then
+  select(lakename, sampledate:temperature_C) %>%  ### then
   mutate(temperature_F = (temperature_C*9/5) + 32)
   
 ```
