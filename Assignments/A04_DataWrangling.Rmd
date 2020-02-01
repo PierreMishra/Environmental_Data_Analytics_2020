@@ -1,6 +1,6 @@
 ---
 title: "Assignment 4: Data Wrangling"
-author: "Student Name"
+author: "Pierre Mishra"
 output: pdf_document
 geometry: margin=2.54cm
 ---
@@ -25,8 +25,21 @@ The completed exercise is due on Tuesday, February 4 at 1:00 pm.
 
 ```{r, message = FALSE}
 #1
+library("tidyverse")
+library("lubridate")
+getwd()
+epa.o3.18 <- read.csv("../Data/Raw/EPAair_O3_NC2018_raw.csv")
+epa.o3.19 <- read.csv("../Data/Raw/EPAair_O3_NC2019_raw.csv")
+epa.pm25.18 <- read.csv("../Data/Raw/EPAair_PM25_NC2018_raw.csv")
+epa.pm25.19 <- read.csv("../Data/Raw/EPAair_PM25_NC2019_raw.csv")
 
 #2
+
+datasets <- list(epa.o3.18, epa.o3.19, epa.pm25.18, epa.pm25.19)
+lapply(datasets, dim)
+lapply(datasets, colnames)
+lapply(datasets, str)
+
 ```
 
 ## Wrangle individual datasets to create processed files.
@@ -37,12 +50,38 @@ The completed exercise is due on Tuesday, February 4 at 1:00 pm.
 
 ```{r}
 #3
+epa.o3.18$Date <- as.Date(epa.o3.18$Date, format = "%m/%d/%Y")
+epa.o3.19$Date <- as.Date(epa.o3.19$Date, format = "%m/%d/%Y")
+epa.pm25.18$Date <- as.Date(epa.pm25.18$Date, format = "%m/%d/%Y")
+epa.pm25.19$Date <- as.Date(epa.pm25.19$Date, format = "%m/%d/%Y")
 
 #4
+epa.o3.18 <- select(epa.o3.18, Date, DAILY_AQI_VALUE, 
+                    Site.Name, AQS_PARAMETER_DESC, COUNTY, 
+                    SITE_LATITUDE, SITE_LONGITUDE)
+epa.o3.19 <- select(epa.o3.19, Date, DAILY_AQI_VALUE, 
+                    Site.Name, AQS_PARAMETER_DESC, COUNTY, 
+                    SITE_LATITUDE, SITE_LONGITUDE )
+epa.pm25.18 <- select(epa.pm25.18, Date, DAILY_AQI_VALUE, 
+                    Site.Name, AQS_PARAMETER_DESC, COUNTY, 
+                    SITE_LATITUDE, SITE_LONGITUDE )
+epa.pm25.19 <- select(epa.pm25.19, Date, DAILY_AQI_VALUE, 
+                    Site.Name, AQS_PARAMETER_DESC, COUNTY, 
+                    SITE_LATITUDE, SITE_LONGITUDE )
 
 #5
+epa.pm25.18$AQS_PARAMETER_DESC <- "PM2.5"
+epa.pm25.19$AQS_PARAMETER_DESC <- "PM2.5"
 
 #6
+write.csv(epa.o3.18, row.names = FALSE, 
+          file = "../Data/Processed/EPAair_O3_NC2018_processed.csv")
+write.csv(epa.o3.19, row.names = FALSE, 
+          file = "../Data/Processed/EPAair_O3_NC2019_processed.csv")
+write.csv(epa.pm25.18, row.names = FALSE, 
+          file = "../Data/Processed/EPAair_PM25_NC2018_processed.csv")
+write.csv(epa.pm25.19, row.names = FALSE, 
+          file = "../Data/Processed/EPAair_PM25_NC2019_processed.csv")
 
 ```
 
@@ -62,15 +101,29 @@ The completed exercise is due on Tuesday, February 4 at 1:00 pm.
 
 ```{r}
 #7
+epa <- rbind (epa.o3.18, epa.o3.19, epa.pm25.18, epa.pm25.19)
 
 #8
+epa.processed <- epa %>%
+  filter(Site.Name %in% c("Linville Falls", "Durham Armory", "Leggett", "Hattie Avenue",
+                          "Clemmons Middle", "Mendenhall School", "Frying Pan Mountain",
+                          "West Johnston Co.", "Garinger High School", "Castle Hayne",
+                          "Pitt Agri. Center", "Bryson City", "Millbrook School")) %>%
+  group_by(Date, Site.Name, AQS_PARAMETER_DESC, COUNTY) %>%
+  summarise (DAILY_AQI_VALUE = mean(DAILY_AQI_VALUE),
+             SITE_LATITUDE = mean(SITE_LATITUDE),
+             SITE_LONGITUDE = mean(SITE_LONGITUDE)) %>%
+  mutate (Month = month(Date), Year = year(Date))
 
 #9
+epa.processed.wide <- spread(epa.processed, AQS_PARAMETER_DESC, DAILY_AQI_VALUE)
 
 #10
+dim(epa.processed.wide)
 
 #11
-
+write.csv(epa.processed.wide, row.names = FALSE, 
+          file = "../Data/Processed/EPAair_O3_PM25_NC1718_Processed.csv")
 ```
 
 
@@ -81,13 +134,18 @@ The completed exercise is due on Tuesday, February 4 at 1:00 pm.
 
 ```{r}
 #12a
-
-#12b
+epa.summary <- 
+  epa.processed.wide %>%
+  group_by(Site.Name, Month, Year) %>%
+  summarise (mean_ozone = mean(Ozone),
+             mean_pm25 = mean(PM2.5)) %>%
+#12b  
+  drop_na (Month, Year)
 
 #13
-
+dim(epa.summary)
 ```
 
 14. Why did we use the function `drop_na` rather than `na.omit`?
 
-> Answer: 
+> Answer: We used `drop_na` because `na.omit` is used for an object (such as a dataframe) as a whole. It will drop all the rows with even a single `NA` value. However, we wanted to drop only certain rows with `NA` values (in columns `Month` and `Year`). Because `na.omit` applies to a whole dataframe, we do not have the selective functionality that `drop_na` offers and therefore, we did not use `na.omit`.
