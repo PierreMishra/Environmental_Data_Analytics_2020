@@ -1,6 +1,6 @@
 ---
 title: "Assignment 6: GLMs week 1 (t-test and ANOVA)"
-author: "Student Name"
+author: "Pierre Mishra"
 output: pdf_document
 geometry: margin=2.54cm
 editor_options: 
@@ -29,10 +29,16 @@ The completed exercise is due on Tuesday, February 18 at 1:00 pm.
 
 ```{r, message = FALSE}
 #1
-
+getwd()
+library("tidyverse")
+library("cowplot")
+library("agricolae")
+peterpaul <- read.csv("./Data/Processed/NTL-LTER_Lake_Nutrients_PeterPaul_Processed.csv")
 
 #2
-
+peterpaul$sampledate <- as.Date(peterpaul$sampledate, format = "%Y-%m-%d")
+head(peterpaul$sampledate)
+class(peterpaul$sampledate)
 ```
 
 
@@ -40,7 +46,15 @@ The completed exercise is due on Tuesday, February 18 at 1:00 pm.
 
 3. Wrangle your dataset so that it contains only surface depths and only the years 1993-1996, inclusive. Set month as a factor.
 ```{r}
+class(peterpaul$year4)
+peterpaul_surface <- filter(peterpaul, depth == 0.00 & 
+                              (year4 == 1993 |
+                                 year4 == 1994|
+                                 year4 == 1995|
+                                 year4 == 1996))
 
+peterpaul_surface$month <- as.factor(peterpaul_surface$month)
+class(peterpaul_surface$month)
 
 ```
 
@@ -50,7 +64,7 @@ Peter Lake was manipulated with additions of nitrogen and phosphorus over the ye
 
 4. Which application of the GLM will you use (t-test, one-way ANOVA, two-way ANOVA with main effects, or two-way ANOVA with interaction effects)? Justify your choice.
 
-> Answer: 
+> Answer: I will use two-way ANOVA with interaction effects because here I have a continuous response variable and two categorical explanatory variables and I am also interested in the interection effects between the explanatory variables (months and lakes). I want to see if total phosphorus or total nitrogen (continuous response) is higher in Peter or Paul Lake (first categorical variable) and see if these potential differences vary seasonally (second categorical variable). 
 
 5. Run your test for TN. Include examination of groupings and consider interaction effects, if relevant.
 
@@ -58,10 +72,21 @@ Peter Lake was manipulated with additions of nitrogen and phosphorus over the ye
 
 ```{r}
 #5
+peterpaul_tn <- aov(data = peterpaul_surface, tn_ug ~ lakename * month)
+summary (peterpaul_tn) # no significant interaction effects, but significant main effect of lake
 
+grouping_1 <- HSD.test(peterpaul_tn, "lakename", group = TRUE)
+grouping_1
 
 #6
+peterpaul_tp <- aov(data = peterpaul_surface, tp_ug ~ lakename * month)
+summary (peterpaul_tp) # significant interaction effects
 
+peterpaul_interaction <- with(peterpaul_surface, interaction (lakename, month))
+peterpaul_interaction_anova <- aov(data = peterpaul_surface, tp_ug ~ peterpaul_interaction) 
+
+grouping_2 <- HSD.test(peterpaul_interaction_anova, "peterpaul_interaction", group = TRUE)
+grouping_2
 
 ```
 
@@ -69,11 +94,41 @@ Peter Lake was manipulated with additions of nitrogen and phosphorus over the ye
 
 8. Combine your plots with cowplot, with a common legend at the top and the two graphs stacked vertically. Your x axes should be formatted with the same breaks, such that you can remove the title and text of the top legend and retain just the bottom legend. 
 
-```{r}
-#7
+```{r, fig.height = 10, fig.width=7.5 }
+#setting theme
+peaceful.theme <- theme_classic(base_size = 14) +
+  theme(axis.text = element_text(color = "black"), 
+        legend.position = "right")
 
+theme_set(peaceful.theme)
+
+#7
+#### total nitrogen
+tn_plot <- ggplot(peterpaul_surface, aes(y = tn_ug, x = month, color = lakename)) +
+  geom_boxplot() + 
+  labs(y = expression(TN ~ (mu*g / L)), x = " ", color = " ") +
+  theme (legend.position = "top") + ylim (0,2300) +
+  stat_summary(geom = "text", fun.y = max, vjust = -1, 
+               position = position_dodge(.7),  size = 3.5,
+               label = c("a", "b", "a", "b", "a", "b", 
+                         "a", "b", "a", "b")) +
+  scale_color_manual(values = c("Paul Lake" = "gray48", "Peter Lake" = "darkorange"))
+
+#### total phosphorus
+tp_plot <- ggplot(peterpaul_surface, aes(y = tp_ug, x = month, color = lakename)) +
+  geom_boxplot() + 
+  labs(y = expression(TP ~ (mu*g / L)), x = "\n Month", color = "Lake Names") +
+  theme (legend.position = "top") + ylim (0,80) +
+  stat_summary(geom = "text", fun.y = max, vjust = -1, 
+               position = position_dodge(.7),  size = 3.5,
+               label = c("bcd", "cd", "ab", "d", "a", "d", 
+                         "abc", "d", "abcd", "cd")) +
+  scale_color_manual(values = c("Paul Lake" = "gray48", "Peter Lake" = "darkorange"))
 
 #8
+
+plot_grid(tn_plot, tp_plot + theme(legend.position="none"),  
+          nrow = 2, axis = 'lr', align = 'v', rel_heights = c(1,1))
 
 ```
 
