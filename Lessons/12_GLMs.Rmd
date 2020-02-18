@@ -17,7 +17,7 @@ editor_options:
 ```{r, message = FALSE}
 getwd()
 library(tidyverse)
-options(scipen = 4)
+options(scipen = 4) #it helps to display 4 digits instead of exponential stuff. it affects coefficits as well
 
 PeterPaul.chem.nutrients <- read.csv("./Data/Processed/NTL-LTER_Lake_Chemistry_Nutrients_PeterPaul_Processed.csv")
 
@@ -31,6 +31,8 @@ theme_set(mytheme)
 ## Linear Regression
 The linear regression, like the t-test and ANOVA, is a special case of the **generalized linear model** (GLM). A linear regression is comprised of a continuous response variable, plus a combination of 1+ continuous response variables (plus the error term). The deterministic portion of the equation describes the response variable as lying on a straight line, with an intercept and a slope term. The equation is thus a typical algebraic expression: 
 $$ y = \alpha + \beta*x + \epsilon $$
+this is how you put equation.
+
 
 The goal for the linear regression is to find a **line of best fit**, which is the line drawn through the bivariate space that minimizes the total distance of points from the line. This is also called a "least squares" regression. The remainder of the variance not explained by the model is called the **residual error.** 
 
@@ -52,11 +54,16 @@ irradiance.regression <- lm(data = PeterPaul.chem.nutrients, irradianceWater ~ d
 summary(irradiance.regression)
 
 # Correlation
-cor.test(PeterPaul.chem.nutrients$irradianceWater, PeterPaul.chem.nutrients$depth)
+cor.test(PeterPaul.chem.nutrients$irradianceWater, PeterPaul.chem.nutrients$depth) #relationship between depht and radiance
 ```
 Question: How would you report the results of this test (overall findings and report of statistical output)?
 
->  
+> At greater depth, irrandiance decreases (linear regression, R2 = 0.31, df = 15,449, p < 0.0001 ).
+> Depth accounts for approximately 30% variance in irradiance (linear regression, R2 = 0.31, df = 15,449, p < 0.0001 )
+> Irradiance decreases significantly with decreasing depth (linear regression, R2 = 0.31, df = 15,449, p < 0.0001 )
+> For each 1 meter increase in depth, irradiance decreases by 95 unites
+> test statisitic for linear regression is r squared. Outside reader would not be interested in null hypothesis and pvalue in a sentence, so we have to keep those things in mind.
+with each increase in unit of depth, irradiance goes down by -95, report t value, p value and  adjusted r squar (what pecent of variance in radiance is explained by depth)
 
 So, we see there is a significant negative correlation between irradiance and depth (lower light levels at greater depths), and that this model explains about 31 % of the total variance in irradiance. Let's visualize this relationship and the model itself. 
 
@@ -71,9 +78,9 @@ An exploratory option to visualize the model fit is to use the function `plot`. 
 4. **Residuals vs. Leverage.** This graph will display potential outliers. The values that fall outside the dashed red lines (Cook's distance) are outliers for the model. Watch for drastic departures of the solid red line from horizontal - this is a sign of a poor model fit.
 
 ```{r, fig.height = 3, fig.width = 4}
-par(mfrow = c(2,2), mar=c(1,1,1,1))
-plot(irradiance.regression)
-par(mfrow = c(1,1))
+par(mfrow = c(2,2), mar=c(1,1,1,1)) # mar is important for knitting properly
+plot(irradiance.regression) # this plot should never end up in a final report, it is just exploratory.
+par(mfrow = c(1,1)) #trying to set assumption, she returned the template back to 1 1 grid
 ```
 
 The option best suited for communicating findings is to plot the explanatory and response variables as a scatterplot. 
@@ -84,34 +91,35 @@ irradiancebydepth <-
   ggplot(PeterPaul.chem.nutrients, aes(x = depth, y = irradianceWater)) +
   #ylim(0, 2000) +
   geom_point() 
-print(irradiancebydepth) 
+print(irradiancebydepth)  # that one high outlier is a complete unrealistic number, so we should remove it. after removing that outlier, we can see that there is an exponential decay, doesn't seem linear, so we can think of transforming and logging?
 ```
 
 Given the distribution of irradiance values, we don't have a linear relationship between x and y in this case. Let's try log-transforming the irradiance values.
 
 ```{r, fig.height = 3, fig.width = 4}
 PeterPaul.chem.nutrients <- filter(PeterPaul.chem.nutrients, 
-                                   irradianceWater != 0 & irradianceWater < 5000)
-irradiance.regression2 <- lm(data = PeterPaul.chem.nutrients, log(irradianceWater) ~ depth)
-summary(irradiance.regression2)
+                                   irradianceWater != 0 & irradianceWater < 5000) # we are removing outlier and values that have zero irrandiance
+irradiance.regression2 <- lm(data = PeterPaul.chem.nutrients, log(irradianceWater) ~ depth) # we logged y axis
+summary(irradiance.regression2) # now our r-square is so higher, 70% of variance in radiace is accounted for, adjusted r-square will give you penalty if low sample size, so its good to use adjusted r-square always.
 
 par(mfrow = c(2,2), mar=c(1,1,1,1))
-plot(irradiance.regression2)
+plot(irradiance.regression2) # lines are still not horizontal tho, but it is common in environmental data
 par(mfrow = c(1,1))
 
 # Add a line and standard error for the linear regression
 irradiancebydepth2 <- 
   ggplot(PeterPaul.chem.nutrients, aes(x = depth, y = irradianceWater)) +
-  geom_smooth(method = "lm") +
+  geom_smooth(method = "lm") + #smooth allows us to plot line of best fit
   scale_y_log10() +
   geom_point() 
 print(irradiancebydepth2) 
 
-# SE can also be removed
+# SE can also be removed (the shaded part)
 irradiancebydepth2 <- 
     ggplot(PeterPaul.chem.nutrients, aes(x = depth, y = irradianceWater)) +
-    geom_point() +
+    geom_point(pch = 1, color = "dodgerblue") + #pch determines the shape of the point
     scale_y_log10() +
+  labs(x = "Depth(m)", y = "Irradiance()") +
     geom_smooth(method = 'lm', se = FALSE, color = "black")
 print(irradiancebydepth2)
 
@@ -124,7 +132,8 @@ As with the t-test and ANOVA, there is a nonparametric variant to the linear reg
 
 ``` {r}
 cor.test(PeterPaul.chem.nutrients$irradianceWater, PeterPaul.chem.nutrients$depth, 
-         method = "spearman", exact = FALSE)
+         method = "spearman", exact = FALSE) # whethter we want exactp-value or small p-value
+# it is good if you are not meeting the assumptions, but it much lest robust, coz it does not give many test statisitcs
 ```
 
 ## Multiple Regression
@@ -151,15 +160,15 @@ par(mfrow = c(1,1))
 We can also make exploratory plots of several continuous data points to determine possible relationships, as well as covariance among explanatory variables. 
 
 ```{r, fig.height = 3, fig.width = 4}
-#install.packages("corrplot")
+install.packages("corrplot")
 library(corrplot)
 PeterPaulnutrients <- 
   PeterPaul.chem.nutrients %>%
   select(tn_ug:po4) %>%
-  na.omit()
+  na.omit() #omit any row in the dataset that has even 1 omit
 PeterPaulCorr <- cor(PeterPaulnutrients)
-corrplot(PeterPaulCorr, method = "ellipse")
-corrplot.mixed(PeterPaulCorr, upper = "ellipse")
+corrplot(PeterPaulCorr, method = "ellipse") # the more intense the color the more strong is the rekationship, stronger correlation is skinnier and 
+corrplot.mixed(PeterPaulCorr, upper = "ellipse") # this is telling us which variables are highly correlated to each other that we might not want to put in our model to avoid multicollinearity. 
 ```
 
 ## AIC to select variables
@@ -169,14 +178,15 @@ However, it is possible to over-parameterize a linear model. Adding additional e
 Let's say we want to know which explanatory variables will allow us to best predict total phosphorus concentrations. Potential explanatory variables from the dataset could include depth, dissolved oxygen, temperature, PAR, total N concentration, and phosphate concentration.
 
 ```{r}
+# we can give it a list of potential explanatory variables to choose the model that is more parsimonius one, smaller the AIC value, the better, AIC only works for the best model for 1 thing, AIC has no meaning for tn AND tp, but within predicintg tn you can use model that has the smalles AIC
 Paul.naomit <- PeterPaul.chem.nutrients %>%
   filter(lakename == "Paul Lake") %>%
   na.omit()
 
 TPAIC <- lm(data = Paul.naomit, tp_ug ~ depth + dissolvedOxygen + 
-              temperature_C + tn_ug + po4)
-step(TPAIC)
+              temperature_C + tn_ug + po4) # try to pick such that you minimize multi-collinearity
+step(TPAIC) #-po4 means everything except phosphate, and <none> means nothing is removed
 TPmodel <- lm(data = Paul.naomit, tp_ug ~ dissolvedOxygen + temperature_C + tn_ug)
-summary(TPmodel)
+summary(TPmodel) # we are predicting 26% of variance (r2), interestingly its saying that tn_ug is not significant but it might give better explanatory power to other significant variables.
 
 ```
