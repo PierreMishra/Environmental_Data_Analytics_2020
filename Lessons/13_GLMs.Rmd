@@ -19,9 +19,9 @@ getwd()
 library(tidyverse)
 library(lubridate)
 library(viridis)
-#install.packages("nlme")
+install.packages("nlme")
 library(nlme)
-#install.packages("piecewiseSEM")
+install.packages("piecewiseSEM")
 library(piecewiseSEM)
 
 PeterPaul.chem.nutrients <- read.csv("./Data/Processed/NTL-LTER_Lake_Chemistry_Nutrients_PeterPaul_Processed.csv")
@@ -44,15 +44,17 @@ Let's say we wanted to predict total nitrogen concentrations by depth and by lak
 ```{r, fig.height = 3, fig.width = 4}
 # main effects
 TNancova.main <- lm(data = PeterPaul.chem.nutrients, tn_ug ~ lakename + depth)
-summary(TNancova.main)
+summary(TNancova.main) # intercept will be paul lake at zero meters depth, it will have tn concentration of 284, peter lake is 66 more than paul lake and significantly higher. At each 1 ubnit increase in depth, TN increase by 68
 
-# interaction effects
+# interaction effects (we might have different intercept for each lake but we might also have diffrent beta for each lake)
 TNancova.interaction <- lm(data = PeterPaul.chem.nutrients, tn_ug ~ lakename * depth)
-summary(TNancova.interaction)
+summary(TNancova.interaction) #intercept is paul lake at depth of zero, if the lake is paul lake each increase in depth will be an increase in 90 tn, and peterlake at that depth would be -35 of what paul lake was. We have explained 42 percent of the variation by our interaction effect
 
 TNplot <- ggplot(PeterPaul.chem.nutrients, aes(x = depth, y = tn_ug, color = lakename)) + 
   geom_point() + 
-  geom_smooth(method = "lm", se = FALSE) +
+  geom_smooth(method = "lm", se = FALSE) + # this helps to make a line
+  labs (x = "Depth (m)", y = expression (TN~(mu*g/L)), color = "") +
+  scale_color_manual (values = c("cadetblue", "red")) +
   xlim(0, 10)
 print(TNplot)
 
@@ -60,6 +62,8 @@ print(TNplot)
 ```
 
 ## HIERARCHICAL MODELS
+
+All these exampless of models we have talked about had fixed effects
 
 **Hierarchical models,** or **mixed-effects models,** are a type of linear model in which explanatory variables are given a model whose parameters are also estimated by the data. The coefficients associated with explanatory variables thus may not be a single value but instead be sampled from a distribution, called the hyper-distribution, which is defined by the modeler. The advantage of the hierarchical model is that it builds capacity to describe multiple layers of stochasticity, which enables accounting of all aspects of uncertainty in a system. Specifically, we can separately model the process of interest and the sampling process. 
 
@@ -80,37 +84,39 @@ Let's think about the situation of temperature monitoring in the NTL-LTER lakes.
 Let's wrangle our data and visualize a preliminary relationship between our variables of interest.
 
 ```{r}
+# we might be interensted not in specific lakes but more geenrally how lakes have 
+
 NTL.summertemp <- 
   NTL.chem %>%
   select(lakename:temperature_C) %>%
   #filter for Julian days in July and surface measurements
-  filter(daynum > 181 & daynum < 213 & depth == 0 ) %>%
+  filter(daynum > 181 & daynum < 213 & depth == 0 ) %>%  #selecting from month of July
   #code won't work if there are NAs
-  na.exclude()
+  na.exclude() # excluding NA's 
 
 NTLtemps <-
 ggplot(NTL.summertemp, aes(x = sampledate, y = temperature_C, color = lakename)) +
   geom_point() +
   scale_color_viridis_d()
-print(NTLtemps)
+print(NTLtemps)     # take this variability into characterize
 ```
 
 Next, we will build a hierarchical model. We will use the package `nlme` for our analyses. Another good package for running hierarchical, or mixed-effects, models is `lme4`. For the basic types of hierarchical models, these packages have about the same functionality. We will set year year (continuous) as a fixed effect and lake (categorical) as a random effect. Remember that we are interested in assessing if summer surface temperatures have increased in response to climate change and to account for the inter-lake variability within the model.
 
 
 ```{r}
-TempTest.mixed <- lme(data = NTL.summertemp,
+TempTest.mixed <- lme(data = NTL.summertemp, # lme is linear mixed effects, we wanna know hoe temperature varies by year, so year as our fixed effect
                      temperature_C ~ year4, 
-                     random = ~1|lakename)
-summary(TempTest.mixed)
-rsquared(TempTest.mixed)
+                     random = ~1|lakename) #since we are just grouping by lakename we used 1 (random fact of our model). We might be interested in knowing what exactly the values for year that is why it is a fixed value, random effect typically shd be category
+summary(TempTest.mixed) # it rounds p-value, randome effect doesnt have p-value  because we are nt interested in measured effect of random effect. We are just interested in incoporating it in our model, each year the temperature of lake is increased by 0.06 degree
+rsquared(TempTest.mixed) # ths gives us what the R2 would be if we just had fixed effect and then with random effect  (conditional is for random effect, marginal is for fixed effect), 
 
 # Compare the random effects model with the fixed effects model
-TempTest.fixed <- gls(data = NTL.summertemp,
+TempTest.fixed <- lm(data = NTL.summertemp, # you could still use lm and still do ANOVA.,change lm to gls but lm doesnt give same R2 as it gave in above Rsquared fucntions  for  marginal (fixed)
                       temperature_C ~ year4)
-summary(TempTest.fixed)
+summary(TempTest.fixed) # fixed effects model
 
-anova(TempTest.mixed, TempTest.fixed)
+anova(TempTest.mixed, TempTest.fixed) # anova on fixed and mixed effects model to see if there are significant differences between the model, it also gives p-value, which means it is different
 # The lower the AIC, the better.
 # The p-value tells us whether those models have a significantly different fit
 
@@ -118,11 +124,25 @@ NTL.tempmodel <-
 ggplot(NTL.summertemp, aes(x = year4, y = temperature_C, color = lakename)) +
   geom_point() +
   scale_color_viridis_d() +
-  geom_abline(intercept = -97.72, slope = 0.06) +
+  geom_abline(intercept = -97.72, slope = 0.06) + # we used this intercet and sloope from mixed effects model
   # make it look better
   labs(x = "", y = expression("Temperature " ( degree~C)), color = "") +
   theme(legend.spacing.x = unit(0, "cm"))
 print(NTL.tempmodel)
+
+#line of best fit associated with fixed effects and mixed effects model (comparison)
+
+NTL.tempmodel <-
+ggplot(NTL.summertemp, aes(x = year4, y = temperature_C)) +
+  geom_point(aes(color = lakename)) +
+  scale_color_viridis_d() +
+  geom_smooth (method = "lm", se = FALSE) + 
+  geom_abline(intercept = -97.72, slope = 0.06) + # we used this intercet and sloope from mixed effects model
+  # make it look better
+  labs(x = "", y = expression("Temperature " ( degree~C)), color = "") +
+  theme(legend.spacing.x = unit(0, "cm"))
+print(NTL.tempmodel)
+
 ```
 
 Question: How would you interpret the collective results of your mixed effects model in the context of the study question?
