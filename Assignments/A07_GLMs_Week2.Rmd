@@ -1,6 +1,6 @@
 ---
 title: "Assignment 7: GLMs week 2 (Linear Regression and beyond)"
-author: "Student Name"
+author: "Pierre Mishra"
 output: pdf_document
 geometry: margin=2.54cm
 editor_options: 
@@ -27,10 +27,20 @@ The completed exercise is due on Tuesday, February 25 at 1:00 pm.
 
 ```{r}
 #1
-
+getwd()
+library("tidyverse")
+library("nlme")
+library("piecewiseSEM")
+library("RColorBrewer")
+lake <- read.csv("./Data/Raw/NTL-LTER_Lake_ChemistryPhysics_Raw.csv")
+litter <- read.csv("./Data/Processed/NEON_NIWO_Litter_mass_trap_Processed.csv")
 
 #2
+peaceful.theme <- theme_classic(base_size = 14) +
+  theme(axis.text = element_text(color = "black"), 
+        legend.position = "right")
 
+theme_set(peaceful.theme)
 ```
 
 
@@ -47,31 +57,46 @@ Research question: What is the best set of predictors for lake temperatures in J
 
 ```{r}
 #3
-
-
+lake_filter <- 
+  lake %>%
+  filter ((lake$daynum > 181) & (lake$daynum <= 213)) %>%
+  select(lakename, year4, daynum, depth, temperature_C) %>%
+  na.omit()
+  
 #4
+lakeAIC <- lm(data = lake_filter, temperature_C ~ year4 + daynum + depth)
+step(lakeAIC)
+lake_model <- lm(data = lake_filter, temperature_C ~ year4 + daynum + depth)
+summary(lake_model)
 
 ```
 
 5. What is the final set of explanatory variables that predict temperature from your multiple regression? How much of the observed variance does this model explain?
 
-> Answer: 
+> Answer: The three explanatory variables year, day number and lake depth significantly predict lake temperatures (Multiple linear regression, F(3,9972)=9457, p < 0.001). Our model accounts for 73.98% of the variance in observed temperatures.
 
 6. Run an interaction effects ANCOVA to predict temperature based on depth and lakename from the same wrangled dataset.
 
 ```{r}
 #6
-
+lake_ancova <- lm(data = lake_filter, temperature_C ~ depth * lakename)
+summary(lake_ancova)
 ```
 
 7. Is there a significant interaction between depth and lakename? How much variance in the temperature observations does this explain?
 
-> Answer: 
+> Answer: Yes there is a significant interaction effect between depth and lakename. All th interaction effects are significant with a p-value of less than 0.05 except the interaction of depth and paul lake whose p-value is 0.11. 78.55% of variance in the temperature observations can explained by the ANCOVA.
 
 8. Create a graph that depicts temperature by depth, with a separate color for each lake. Add a geom_smooth (method = "lm", se = FALSE) for each lake. Make your points 50 % transparent. Adjust your y axis limits to go from 0 to 35 degrees. Clean up your graph to make it pretty. 
 
 ```{r}
 #8
+ggplot(data = lake_filter, aes(x = depth, y=temperature_C, color=lakename)) +
+  geom_point(alpha = 0.5) + 
+  ylim(0,35) +
+  geom_smooth (method = "lm", se = FALSE, size = 1, lty = 2) +
+  labs (x = "Depth (m)", y = expression("Temperature ("~degree*"C)"), color = "Lakes") +
+  scale_color_manual (values = colorRampPalette(brewer.pal(8, "Set1"))(9))
 
 ```
 
@@ -81,21 +106,30 @@ a. Build and run a mixed effects model.
 b. Check the difference between the marginal and conditional R2 of the model. 
 
 ```{r}
+#a.
+litter_mixed <- lme(data = litter, dryMass ~ nlcdClass * functionalGroup,
+                    random = ~1|plotID)
+summary(litter_mixed)
 
-
+#b.
+rsquared(litter_mixed)
 ```
 
 b. continued... How much more variance is explained by adding the random effect to the model? 
 
-> Answer: 2 %
+> Answer: The variance increased by 2.132 % by adding the random effect to the model
 
 c. Run the same model without the random effect.
 d. Run an anova on the two tests. 
 ```{r}
- 
+#c.
+litter_fixed <- lm(data = litter, dryMass ~ nlcdClass * functionalGroup)
+summary(litter_fixed)
 
+#d.
+anova(litter_mixed, litter_fixed)
 ```
 
 d. continued... Is the mixed effects model a better model than the fixed effects model? How do you know?
 
-> Answer: 
+> Answer: Our ANOVA returned a p-value less than 0.0001 meaning that both the models have a significantly different fit. The mixed effects model is a better model because it has a lower AIC and BIC value. 
