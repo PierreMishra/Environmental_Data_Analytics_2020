@@ -190,11 +190,11 @@ In general, detecting a monotonic trend requires a long sequence of data with fe
 
 Adjusting the data may be necessary to fulfill the assumptions of a trend test. These adjustments include **aggregation**, **subsampling**, and **interpolation**. What do each of these mean, and why might we want to use them?
 
-> aggregation: 
+> aggregation: take months and compile into a yearly data (could be mean, sum or median). eg if you have 28 days and missing data for 2 days, you can summarize across a dataset.
 
-> subsampling: 
+> subsampling: lets say you have a daily data and you take first point of each month as a monthly representive (to minimize so many data points). Subsampling is used the least in time series.
 
-> interpolation: 
+> interpolation: predicting values for data gaps from existing data.
 
 Common interpolation methods: 
 
@@ -212,7 +212,7 @@ NCOzone <-
 ggplot(NCAir, aes(x = Date, y = Ozone)) +
   geom_point() +
   facet_wrap(vars(Site.Name))
-print(NCOzone)
+print(NCOzone) # it doesnt make sense to interpolate for the data gaps, and it might estimate that airquality is constant but for some data we can see that there is a dip.
 
 NCPM2.5 <-
 ggplot(NCAir, aes(x = Date, y = PM2.5)) +
@@ -220,7 +220,7 @@ ggplot(NCAir, aes(x = Date, y = PM2.5)) +
   facet_wrap(vars(Site.Name))
 print(NCPM2.5)
 
-summary(NCAir$Site.Name)
+summary(NCAir$Site.Name) # if we add 365+365 there should be 730 samples. ONly two schools have 730 samples
 
 NCAir.Garinger <- NCAir %>%
   filter(Site.Name == "Garinger High School")
@@ -228,12 +228,13 @@ NCAir.Garinger <- NCAir %>%
 GaringerOzone <-
 ggplot(NCAir.Garinger, aes(x = Date, y = Ozone)) +
   geom_point() 
-print(GaringerOzone)
+print(GaringerOzone) # it looks like it is good complete dataset but we do have 8 missing days
 
 # na.approx function fills in NAs with a linear interpolation
 # Spline interpolation can also be specified as an alternative
 # Piecewise constant interpolation can be done with na.aggregate
-NCAir.Garinger$Ozone <- na.approx(NCAir.Garinger$Ozone)
+# we will not piecewise today because our data has seasonality so we do not expect it to be a straight line
+NCAir.Garinger$Ozone <- na.approx(NCAir.Garinger$Ozone) # if there were 2 missing points, it would fill the first point closer to the lower value and 2nd point closer to the upper value
 NCAir.Garinger$PM2.5 <- na.approx(NCAir.Garinger$PM2.5)
 
 GaringerOzone.interpolated <-
@@ -247,7 +248,7 @@ print(GaringerOzone.interpolated)
 Specific tests for monotonic trend analysis are listed below, with assumptions and tips: 
 
 * **linear regression**: no seasonality, fits the assumptions of a parametric test. Function: `lm`
-* **Mann-Kendall**: no seasonality, non-parametric, no temporal autocorrelation, missing data allowed. Function: `mk.test` (package: trend)
+* **Mann-Kendall**: no seasonality, non-parametric, no temporal autocorrelation (data closer to ecah other correlate with each other more), missing data allowed. Function: `mk.test` (package: trend)
 * **modified Mann-Kendall**: no seasonality, non-parametric, accounts for temporal autocorrelation, missing data allowed. Function: `mmky` and `mmkh` (package: modifiedmk)
 * **Seasonal Mann-Kendall**: seasonality, non-parametric, no temporal autocorelation, identical distribution. Function: `smk.test` (package: trend)
 
@@ -267,34 +268,35 @@ We will calculate the mean monthly discharge for this dataset, rather than calcu
 EnoDischarge.late.monthly <- EnoDischarge.late %>%
   mutate(Year = year(datetime), 
          Month = month(datetime)) %>%
-  group_by(Year, Month) %>%
-  summarise(Discharge = mean(discharge.mean)) 
+  group_by(Year, Month) %>% # the only new column we will see is the months that you group by and the what you have in summarize below.
+  summarise(Discharge = mean(discharge.mean)) #why did she use mean, coz mean will account for outliers, if you would sum individual days, feb will have less sum than march just because it has less days
   
 EnoDischarge.late.monthly$Date <- as.Date(paste(EnoDischarge.late.monthly$Year, 
                                                 EnoDischarge.late.monthly$Month, 
-                                                1, sep="-"), 
-                                          format = "%Y-%m-%d")
+                                                1, sep="-"), #value of 1 indicating the day is.
+                                          format = "%Y-%m-%d") # we are doing that just to graph properly as a date.
 
 # Generate time series (smk.test needs ts, not data.frame)
 EnoDischarge.late.monthly.ts <- ts(EnoDischarge.late.monthly$Discharge, frequency = 12, 
-                        start = c(1985, 10, 1), end = c(2019, 12, 1))
+                        start = c(1985, 10, 1), end = c(2019, 12, 1)) # we mentioned this because our time series starts from october
 # Run SMK test
 EnoDischarge.late.trend <- smk.test(EnoDischarge.late.monthly.ts)
 
 # Inspect results
-EnoDischarge.late.trend
-summary(EnoDischarge.late.trend)
+EnoDischarge.late.trend # is there monotonic trend over time, is it positive or negative, null is there is no monotonic trend and altternative is that there is, either positive or negative, we can interpret both an overall trend and a specific seasonal trend (below with summary)
+summary(EnoDischarge.late.trend) # in case january was significant, we will interpret it like this, there was no overall significnace but there was an significant increase in discharge for the month of January. This is about trend across seasons. Do not report 's'
 
 EnoDischarge.monthly <-
 ggplot(EnoDischarge.late.monthly, aes(x = Date, y = Discharge)) +
   geom_point() +
   geom_line()
 print(EnoDischarge.monthly)
+
 ```
 
 What would we conclude based on these findings? 
 
->
+> There is no significant overall trend in our data set. The discharge does not vary with respect to a seasonal component (p = __, z = _).
  
 If a significant trend was present, we could compute a **Sen's Slope** to quantify that trend (`sens.slope` function in the trend package).
 
