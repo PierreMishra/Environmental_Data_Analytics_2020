@@ -48,16 +48,19 @@ library("tidyr")
 library("ggplot2")
 library("purrr")
 # some spatial data packages
+#install.packages("sf")
 library("sf")
+#install.packages("ggmap")
 library("ggmap")
 # some other packages
+#install.packages("here")
 library("here")
 ```
 
 Please make sure that the pdf() command works on your computer.
 
 ```{r check.pdf}
-pdf(here("outputs", "pdf_test.pdf"), width = 11, height = 8.5)
+pdf(here("outputs", "pdf_test.pdf"), width = 11, height = 8.5) # for large datasets we can directly save it as pdf for plotting, coz its slow on the plots package
 ggplot(data = cars) +
   geom_point(aes(x = dist, y = speed))
 dev.off()
@@ -81,7 +84,8 @@ here()
 
 # use here to generate a data path
 # here("directory1", "directory2", "...", "file.extension")
-here("data", "tabular_data", "conterm_basinid.txt")
+here("data", "tabular_data", "conterm_basinid.txt") #go to data folder, go to tabular_data folder etc...
+# it is just get 
 # for mac: [1] "/User/.../sf-lesson/data/tabular_data/conterm_basinid.txt"
 # for windows: [1] "C:\\...\sf-lesson\data\tabular_data\conterm_basinid.txt"
 
@@ -172,7 +176,7 @@ Two caveats here are that (1) stars is still being developed and (2) it is built
 
 ### 1.7 What is a coordinate reference system (CRS)?
 
-A coordinate reference systems defines how we convert (or we can say "project") a 3D object (in this case, the Earth) to 2D surface.
+A coordinate reference systems defines how we convert (or we can say "project") a 3D object (in this case, the Earth) to 2D surface. We need coordintae refernce system because the shape of earth does not allow for its accurate represntaion on 2d space.
 
 There are three major types of projections:
 
@@ -250,11 +254,13 @@ National Center for Ecological Analysis and Synthesis created a CRS summary shee
 
 ### 2.1 Data Background
 
-The data we'll use in this lesson comes from the United States Geologic Survey (USGS). Specifically, the dataset is called the Geospatial Attributes of Gages for Evaluating Steamflow, version 2 (GAGES-II) available [here](https://water.usgs.gov/GIS/metadata/usgswrd/XML/gagesII_Sept2011.xml). GAGES-II provides geospatial data and classifications of 9,322 stream gages that are maintained by the USGS. It includes: (1) watershed boundaries by region (spatial data), (2) USGS stream gage locations (spatial data), (3) watershed characteristics (tabular data). Note that the term "watershed" is used interchangeably with the word "basin".
+The data we'll use in this lesson comes from the United States Geologic Survey (USGS). Specifically, the dataset is called the Geospatial Attributes of Gages for Evaluating Steamflow, version 2 (GAGES-II) available [here](https://water.usgs.gov/GIS/metadata/usgswrd/XML/gagesII_Sept2011.xml). GAGES-II provides geospatial data and classifications of 9,322 stream gages that are maintained by the USGS. It includes: (1) watershed boundaries by region (spatial data), (2) USGS stream gage locations (spatial data), (3) watershed characteristics (tabular data). Note that the term "watershed" is used interchangeably with the word "basin" and "catchment".
 
 We'll also being using Southeast state boundary data from the United States Census Bureau.
 
 Here is what the spatial data for this lesson looks like (Figure 4). Southeast state boundaries are shown in dark green, watershed boundaries are shown in light green, and stream gage locations are shown as grey points.
+
+Maps package is also greaaaatttt for diffferent kinds of boundaries!!!!!! She strongly recommends it.
 
 ![Figure 4. Data used in this lesson.](img/gagesii.png)
 
@@ -263,7 +269,7 @@ Here is what the spatial data for this lesson looks like (Figure 4). Southeast s
 Start by reading in the basin boundaries for non-reference (i.e., notable human impact) for the Southeast Plains using `st_read()` from the sf package. Notice how you only call the .shp file here. You don't need to include all the other files that come along with the .shp file (i.e., .prj, .sbn, .shx, .sbx, .dbf, etc.).
 
 ```{r read.in.some.data}
-basins_nf_seplains_raw <- st_read(here("data", "spatial_data", "bas_nonref_SEPlains.shp"))
+basins_nf_seplains_raw <- st_read(here("data", "spatial_data", "bas_nonref_SEPlains.shp")) # we are using st_read, notice we have a shapefile with epsg code and coordinates, we only need to read in the .shp file though we have 6 files in our spatial data folder
 # note how I'm using the here package!
 ```
 
@@ -279,9 +285,9 @@ I like to always save a copy of the raw data in my R session and rename all new 
 
 ```{r activity.load.data}
 # add your code here
-gages_raw <- 
-southeast_state_bounds_raw <- 
-my_tabular_data_raw <- 
+gages_raw <- st_read(here("data", "spatial_data", "gagesII_9322_sept30_2011.shp"))
+southeast_state_bounds_raw <- st_read(here("data","spatial_data", "southeast_state_bounds.shp"))
+my_tabular_data_raw <- read.csv(here("data", "tabular_data","conterm_climate.txt"))
 
 # red warning text is telling you how the data is being parsed
 ```
@@ -304,8 +310,14 @@ Use base R commands to answer the following questions (for basins_nf_seplains_ra
 ```{r activity.check.out.data}
 
 # add your code here
+class(basins_nf_seplains_raw) #sf and dataframe, there could be two classes at once
+colnames(basins_nf_seplains_raw)
+dim(basins_nf_seplains_raw)
+attributes(basins_nf_seplains_raw)
+head(basins_nf_seplains_raw)
 
 # bonus, add your code here
+# you can also use glimpse data from tibble(tidyverse) project
 ```
 
 While not in base, you can also use glimpse() from the tibble (tidyverse) package to look at basin_nf_seplains_raw.
@@ -325,6 +337,9 @@ Use st_crs() to look at the CRSs of the spatial data you have loaded up so far. 
 
 ```{r activity.check.out.data.again}
 # add your code here
+st_crs(basins_nf_seplains_raw)
+st_crs(gages_raw)
+st_crs(southeast_state_bounds_raw) # for all of them i get "No EPSG code" but we want to have same coordinate reference systems or they are not gonna line up propoerly
 
 # first two will not have EPSG code but have proj4 string (i.e., "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs")
 
@@ -339,7 +354,7 @@ Now that you've checked the CRSs of your spatial data, you can either set or pro
 
 When *setting* a CRS, you're labeling the spatial data with a CRS it already has but is not showing up when you load the data into R. Setting also includes defining a missing ESPG or proj4 string; when one is complete but the other is not.
 
-When *projecting* a CRS, you're converting the spatial data from one CRS to another. For the sf package, transform is used interchangeably with project.
+When *projecting* a CRS, you're converting the spatial data from one CRS to another. For the sf package, transform (projecting) is used interchangeably with project.
 
 It's **very** important know the difference between setting and projecting!
 
@@ -371,32 +386,54 @@ Last, check the CRSs of each.
 ```{r activity.setting.projecting}
 # define proj4 string and EPSG code
 # add your code here
-my_proj4 <- 
-my_epsg <- 
+my_proj4 <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs"
+my_epsg <- 5070 #they are both associated to the same reference system, so it is all good! Be careful regarding that
 
 # setting projections
+st_crs(basins_nf_seplains_raw) <- my_proj4 #this is what we are doing below in pipe function
+st_crs(basins_nf_seplains_raw) <- my_epsg   
+
 # set the proj4 string first and then set the EPSG code (because proj4 will over-ride EPSG if you set EPSG first)
 # add your code here
 # basins
 basins_nf_seplains <- basins_nf_seplains_raw
+st_crs(basins_nf_seplains) <- my_proj4
+basins_nf_seplains <- basins_nf_seplains %>%
+  st_set_crs(my_epsg)
+st_crs(basins_nf_seplains)
 
 # add your code here
 # gages
 gages <- gages_raw
+st_crs(gages) <- my_proj4
+gages <- gages %>%
+  st_set_crs(my_epsg)
+st_crs(gages)
 
 # state bounds
 # this one looks good so you don't need to do anything but here's the code anyway
 # add your code here
 southeast_state_bounds <- southeast_state_bounds_raw
+st_crs(southeast_state_bounds) <- my_proj4
+southeast_state_bounds <- southeast_state_bounds %>%
+  st_set_crs(my_epsg)
+st_crs(southeast_state_bounds)
 
 # projecting to North America Albers Equal Area Conic
 # add your code here
-na_albers_proj4 <- 
-na_albers_epsg <- 
+na_albers_proj4 <- "+proj=aea +lat_1=20 +lat_2=60 +lat_0=40 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs"
+na_albers_epsg <- 102008
 # set the proj4 string first and then set the EPSG code (because proj4 will over-ride EPSG if you set EPSG first)
+southeast_state_bounds_na_albers <-  sf::st_transform(southeast_state_bounds, crs = na_albers_proj4) %>%
+  st_set_crs(na_albers_epsg)
 
 # check CRSs
 # add your code here
+st_crs(basins_nf_seplains)
+st_crs(gages)
+st_crs(southeast_state_bounds)
+st_crs(southeast_state_bounds_na_albers)
+# first three should be the same!
 ```
 
 ### 2.6 Converting sp Objects to sf Objects and Vice Versa
@@ -411,7 +448,7 @@ In some cases, you might want to convert (or "cast") from one geometry type to a
 
 ### 2.8 Converting Tabular Data to Spatial Data
 
-What if you don't have a .shp file; instead, you have tabular data with spatial variables in columns? You're in luck! There are ways to convert tabular data to sf objects.
+What if you don't have a .shp file; instead, you have tabular data with spatial variables (longitude and latitude) in columns? You're in luck! There are ways to convert tabular data to sf objects.
 
 Commands to convert tabular data to corresponding sf objects:
 
@@ -435,11 +472,11 @@ names(gages_tabular)
 # LAT_GAGE is y value and LNG_GAGE is x value
 
 # convert to sf object
-gages_tabular_as_sf <- st_as_sf(gages_tabular, coords = c("LNG_GAGE", "LAT_GAGE"), crs = 4326, dim = "XY") # lat long so set CRS = WGS84
+gages_tabular_as_sf <- st_as_sf(gages_tabular, coords = c("LNG_GAGE", "LAT_GAGE"), crs = 4326, dim = "XY") # lat long so set CRS = WGS84, we are specifying refernce system that is why we are setting a reference system, if we already had an sf object we would just use st.transform to change the crs system
 
 # check class and CRS
 class(gages_tabular_as_sf)
-head(gages_tabular_as_sf)
+head(gages_tabular_as_sf) # we dont have latitude and longitude but we have a geometry column
 st_crs(gages_tabular_as_sf)
 # we'll need to change that if we want to use it with state bounds and watershed boundaries
 
@@ -479,7 +516,7 @@ southeast_state_bounds_geometry <- st_geometry(southeast_state_bounds)
 head(southeast_state_bounds_geometry)
 
 # notice the class is different now
-class(southeast_state_bounds_geometry)
+class(southeast_state_bounds_geometry) # its no longer a dataframe O_O
 # it's an sfc class, specifically an sfc_MULTIPOLYGON class
 ```
 
@@ -527,21 +564,38 @@ Bonus: What are some other spatial operations (or confirmations) that you could 
 ```{r activity.gages.select}
 # select a state, here I'm choosing North Carolina (NC)
 # add your code here
+va_state_bounds_geom <- southeast_state_bounds %>%
+  filter(NAME == "Virginia") %>%
+  st_geometry()
+
+names(southeast_state_bounds)
+names(va_state_bounds_geom) #notice it is null
+class(southeast_state_bounds)
 
 # check
 # add your code here
+head(va_state_bounds_geom)
 
 # select watersheds that intersect with NC bounds
 # add your code here
+va_basins_nf_seplains <- basins_nf_seplains %>%
+  st_intersection(va_state_bounds_geom) # basins is our base and
 
 # check
 # add your code here
+head(va_basins_nf_seplains)
 
 # select gages that fall within NC bounds
 # add your code here
+va_gages <- gages %>%
+  st_intersection(va_state_bounds_geom)
 
 # bonus
 # add your code here
+va_area <- st_area(va_state_bounds_geom) # find the area of Virgnia
+va_centroid <- st_centroid(va_state_bounds_geom) # find the centroid of the Virginia, we can use that as a spatial dataset that we can plot
+va_gages_buffer_100m <- st_buffer(va_gages, dist = 100) # make a buffer around the stream gages in Virgina, distance is in unit of dataset (meters)
+not_nc_gages <- st_difference(gages, va_state_bounds_geom) # find stream gages not in Virginia, gages that are outside of the cookie cutter
 ```
 
 It's really helpful to actually plot these results before moving forward with your work. That way you an make sure the sf commands are doing what you expect. We'll talk about plotting next...
@@ -555,8 +609,8 @@ An import part of spatial data analysis is to *check your work* and also *share 
 Usually, I (Sheila) use RStudio to visualize all of my plots but since spatial data often has a large file size, it can take a while to load in the built-in RStudio plotting window. Until the folks at RStudio and sf package developers deal with this, I recommend exporting your spatial visualizations to PDF files in a dedicated folder. Here, we'll practice exporting our plots to the "outputs" folder. Make sure you run all lines of code starting from pdf() to dev.off(). The pdf() will write and open a new empty PDF file and dev.off() will close it. It's ok to get a "null device" message here. R is just telling you that it closed the pdf file it created.
 
 ```{r basic.sf.plotting}
-# basic plot
-pdf(here("outputs", "southeast_state_bounds.pdf"), width = 11, height = 8.5)
+# basic plot, she put ggplot parantheiss emty coz she wanna add layers for geospatial stuff
+pdf(here("outputs", "southeast_state_bounds.pdf"), width = 11, height = 8.5) #first she is plotting boundary, and send it to pdf coz it is faster than plotting it in plot window
 ggplot() +
   geom_sf(data = southeast_state_bounds) + # you can add color = "blue" to change outline color to blue or lwd = 2 to change the width of the lines
   theme_bw() # add this to make the background white and not grey
@@ -577,6 +631,13 @@ ggplot(data = southeast_state_bounds) +
   geom_sf_text(aes(label = NAME), color = "white") +
   theme_bw()
 dev.off()
+
+# checking virginia state boundary
+pdf(here("outputs", "va_state_bounds.pdf"), width = 11, height = 8.5) #first she is plotting boundary, and send it to pdf coz it is faster than plotting it in plot window
+ggplot() +
+  geom_sf(data = va_state_bounds_geom) + # you can add color = "blue" to change outline color to blue or lwd = 2 to change the width of the lines
+  theme_bw() # add this to make the background white and not grey
+dev.off()
 ```
 
 **Activity**
@@ -587,6 +648,11 @@ Let's check your operations from the 3.1.2 activity. You are trying for somethin
 # plot NC watershed boundardies from 3.1.2
 pdf(here("outputs", "spatial_operations_test_fig.pdf"), width = 11, height = 8.5)
 # add your code here
+ggplot() +
+  geom_sf(data = va_state_bounds_geom, color = "red") +
+  #geom_sf(data = va_basins_nf_seplains, aes(fill = va_basins_nf_seplains$AREA)) +
+  geom_sf(data = va_basins_nf_seplains, fill = "pink", alpha = 0.25) +#there are different leves of pinks because darker pinkareas mean that there are more than 1 watershaed overlaping that is giving it a darker color
+  geom_sf(data = va_gages)
 dev.off()
 ```
 
@@ -602,23 +668,23 @@ nc_state_bounds_geom <- southeast_state_bounds %>%
   filter(NAME == "North Carolina") %>%
   st_geometry()
 
-# get data bounding box
+# get data bounding box, we want basemap that can show us more area than just NC
 nc_bbox <- nc_state_bounds_geom %>%
   st_buffer(dist = 150000) %>% # this value is very arbitrary just wanting to make a large buffer around geometry
-  st_transform(4326) %>% # WGS84 (for lat and long)
-  st_bbox()
+  st_transform(4326) %>% # WGS84 (for lat and long) (we are changing it back to latitude and longitude)
+  st_bbox() #stbbox will return coordinates of the corners
 nc_bbox # check
 
-# fix bounding box columns so they match what is needed for the ggmap::get_map() function
+# fix bounding box columns so they match what is needed for the ggmap::get_map() function, to pull basemap, we use output from ncbbox 
 nc_bbox_fix <- c(left = nc_bbox[[1]], bottom = nc_bbox[[2]], right = nc_bbox[[3]], top = nc_bbox[[4]])
 
 # check result
 nc_bbox_fix
 
-# get basemap
-nc_basemap <- get_map(nc_bbox_fix, maptype = 'terrain-background', source = 'stamen', zoom = 8)
-class(nc_basemap)
-st_crs(nc_basemap)
+# get basemap, stamen is the name of the basemap
+nc_basemap <- get_map(nc_bbox_fix, maptype = 'terrain-background', source = 'stamen', zoom = 8) # zoom varies from 3 to 21 (continental scale to building scale)
+class(nc_basemap) # notice it is a rastor
+st_crs(nc_basemap) # notice it is nothing because wach of the files just got loaded are a tile
 # you'll have to trust me that this will have a CRS = WGS84
 
 # convert nc_state_bounds_geom to WGS84 so it matches nc_basemap
@@ -638,7 +704,7 @@ dev.off()
 # plot with basemap
 # windows version?
 pdf(here("outputs", "nc_with_basemap.pdf"), width = 11, height = 8.5)
-ggmap(nc_basemap) +
+ggmap(nc_basemap) + # notce instead of using ggplot, we are using ggmap
   geom_sf(data = nc_state_bounds_geom_wsg84, fill = NA, lwd = 1, inherit.aes = FALSE)
 dev.off()
 
@@ -721,6 +787,7 @@ names(nc_gages)
 
 # join the tabular data to nc_gages
 nc_gages_climate <- nc_gages %>%
+  #mutate(nc_gages, class = numeric()) to hange the type
   left_join(my_tabular_data_raw, by = "STAID")
 
 # check that it worked
