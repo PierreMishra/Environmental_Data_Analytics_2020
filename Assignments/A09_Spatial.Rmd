@@ -1,6 +1,6 @@
 ---
 title: "Assignment 9: Spatial Analysis"
-author: "Student Name"
+author: "Pierre Mishra"
 output: pdf_document
 geometry: margin=2.54cm
 editor_options: 
@@ -39,3 +39,108 @@ Here are your three options:
 * Tabular data that correpond to one of the layers, specified as an aesthetic (e.g., total litter biomass at each trap, land cover class at each trap)
 
 Hint: One package that may come in handy here is the `maps` package, which contains several options for basemaps that cover political and geologic boundaries.
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+```{r}
+# loading packages
+library("readr")
+library("dplyr")
+library("tidyr")
+library("ggplot2")
+library("purrr")
+library("sf")
+library("ggmap")
+library("here")
+
+# Setting theme
+peaceful.theme <- theme_bw(base_size = 14) +
+  theme(axis.text = element_text(color = "black"),
+        plot.title = element_text(hjust = 0.5),
+        legend.position = "right")
+theme_set(peaceful.theme)
+
+# reading files
+here()
+basins <- st_read(here("Lessons", "sf-lesson-20200303", "data", "spatial_data", "bas_nonref_SEPlains.shp"))
+gages <- st_read(here("Lessons", "sf-lesson-20200303", "data", "spatial_data", "gagesII_9322_sept30_2011.shp"))
+states <- st_read(here("Lessons", "sf-lesson-20200303", "data","spatial_data", "southeast_state_bounds.shp"))
+tabular_data <- read.csv(here("Lessons", "sf-lesson-20200303", "data", "tabular_data","conterm_climate.txt")) %>%
+  as.data.frame()
+
+# Checking CRS
+st_crs(basins)
+st_crs(gages)
+st_crs(states)
+
+# Projecting and setting CRS
+my_proj4 <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+my_epsg <- 5070
+
+#basins
+st_crs(basins) <- my_proj4
+basins <- basins %>%
+  st_set_crs(my_epsg)
+
+#gages
+st_crs(gages) <- my_proj4
+gages <- gages %>%
+  st_set_crs(my_epsg)
+
+#states
+st_crs(states) <- my_proj4
+states <- states %>%
+  st_set_crs(my_epsg)
+
+#na_albers
+na_albers_proj4 <- "+proj=aea +lat_1=20 +lat_2=60 +lat_0=40 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs"
+na_albers_epsg <- 102008
+#set the proj4 string first and then set the EPSG code (because proj4 will over-ride EPSG if you set EPSG first)
+states_na_albers <-  sf::st_transform(states, crs = na_albers_proj4) %>%
+  st_set_crs(na_albers_epsg)
+
+# Dealing with geometry
+head(states)
+states_geom <- st_geometry(states) # only preserving the geometry attribute
+states_tabular <- st_drop_geometry(states) # only preserving the tabular data
+head(states_geom)
+class(states)
+class(states_geom)
+class(states_tabular) # we can convert it using tibble()
+
+#
+fl_state_bound_geom <- states %>%
+ filter(NAME == "Florida") %>%
+ st_geometry()
+
+fl_basins <- basins %>%
+  st_intersection(fl_state_bound_geom)
+
+fl_gages <- gages %>%
+  st_intersection (fl_state_bound_geom)
+
+# making same type of variable
+fl_gages$STAID <- as.numeric(as.character(fl_gages$STAID))
+
+fl_gages_join <- fl_gages %>%
+  left_join (tabular_data, by = "STAID")
+
+pdf(here("Assignments", "Mishra_A09_Spatial.pdf"), width = 11, height = 8.5)
+ggplot() +
+  geom_sf(data = fl_state_bound_geom, fill = NA) +
+  geom_sf(data = fl_basins, fill = "gray", alpha = 0.25) +
+  geom_sf(data = fl_gages_join, aes(color = RH_SITE), size = 2.5) +
+  scale_color_gradient(low = "yellow", high = "darkblue") +
+  labs(x = 'Longitude', y='Latitude', title = "Humidity in Florida (1961-1990)", color = "Site Avg. Relative Humidity (%)")
+dev.off()
+
+
+# fl_basins <- basins %>%
+#   st_intersects(fl_state_bound_geom)
+# fl_gages <- gages %>%
+#   st_intersects(fl_state_bound_geom)
+# names(basins)  
+```
+
