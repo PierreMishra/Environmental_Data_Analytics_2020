@@ -772,6 +772,7 @@ Let's try an example. Here we'll select all the gages in NC, join them with one 
 nc_gages <- gages %>%
   st_intersection(nc_state_bounds_geom)
 
+my_tabular_data_raw <- read.csv(here("data", "tabular_data","conterm_climate.txt"))
 # take a look at ng_gages
 head(nc_gages)
 names(nc_gages)
@@ -784,6 +785,7 @@ names(my_tabular_data_raw)
 # check column names of nc_gages to look for joining key
 names(nc_gages)
 # use "STAID"
+nc_gages$STAID <- as.numeric(as.character(nc_gages$STAID))
 
 # join the tabular data to nc_gages
 nc_gages_climate <- nc_gages %>%
