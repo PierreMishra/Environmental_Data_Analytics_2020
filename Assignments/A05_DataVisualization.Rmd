@@ -34,11 +34,11 @@ getwd()
 library("tidyverse")
 library("cowplot")
 peterpaul.chem.nutrients <- 
-  read.csv("../Data/Processed/NTL-LTER_Lake_Chemistry_Nutrients_PeterPaul_Processed.csv")
+  read.csv("./Data/Processed/NTL-LTER_Lake_Chemistry_Nutrients_PeterPaul_Processed.csv")
 peterpaul.chem.nutrients.gathered <-
-  read.csv("../Data/Processed/NTL-LTER_Lake_Nutrients_PeterPaulGathered_Processed.csv")
+  read.csv("./Data/Processed/NTL-LTER_Lake_Nutrients_PeterPaulGathered_Processed.csv")
 litter <-
-  read.csv("../Data/Processed/NEON_NIWO_Litter_mass_trap_Processed.csv")
+  read.csv("./Data/Processed/NEON_NIWO_Litter_mass_trap_Processed.csv")
 
 #2
 peterpaul.chem.nutrients$sampledate <- 
