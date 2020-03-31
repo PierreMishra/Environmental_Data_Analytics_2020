@@ -1,0 +1,876 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={14: Time Series},
+  pdfauthor={Environmental Data Analytics \textbar{} Kateri Salk},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[margin=2.54cm]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+
+\title{14: Time Series}
+\author{Environmental Data Analytics \textbar{} Kateri Salk}
+\date{Spring 2020}
+
+\begin{document}
+\maketitle
+
+\hypertarget{objectives}{%
+\subsection{Objectives}\label{objectives}}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Discuss the purpose and application of time series analysis for
+  environmental data
+\item
+  Choose appropriate time series analyses for trend detection
+\item
+  Address the influence of seasonality on time series analysis
+\item
+  Interpret and communicate results of time series analyses
+\end{enumerate}
+
+\hypertarget{set-up}{%
+\subsection{Set up}\label{set-up}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{getwd}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "C:/Users/Peaceful Pierre/Documents/Academics/Spring 2020/Environmental Data Analytics/Environmental_Data_Analytics_2020"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(tidyverse)}
+\KeywordTok{library}\NormalTok{(lubridate)}
+\CommentTok{\#install.packages("trend")}
+\KeywordTok{library}\NormalTok{(trend)}
+\CommentTok{\#install.packages("zoo")}
+\KeywordTok{library}\NormalTok{(zoo)}
+
+\CommentTok{\# Set theme}
+\NormalTok{mytheme <{-}}\StringTok{ }\KeywordTok{theme\_classic}\NormalTok{(}\DataTypeTok{base\_size =} \DecValTok{14}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{axis.text =} \KeywordTok{element\_text}\NormalTok{(}\DataTypeTok{color =} \StringTok{"black"}\NormalTok{), }
+        \DataTypeTok{legend.position =} \StringTok{"top"}\NormalTok{) }\CommentTok{\# change your theme to your own style}
+\KeywordTok{theme\_set}\NormalTok{(mytheme)}
+
+\NormalTok{EnoDischarge <{-}}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"./Data/Processed/USGS\_Site02085000\_Flow\_Processed.csv"}\NormalTok{)}
+\NormalTok{EnoDischarge}\OperatorTok{$}\NormalTok{datetime <{-}}\StringTok{ }\KeywordTok{as.Date}\NormalTok{(EnoDischarge}\OperatorTok{$}\NormalTok{datetime, }\DataTypeTok{format =} \StringTok{"\%Y{-}\%m{-}\%d"}\NormalTok{) }\CommentTok{\# we are working with time series so we shd pay attention to date}
+
+\NormalTok{NCAir <{-}}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"./Data/Processed/EPAair\_O3\_PM25\_NC1819\_Processed.csv"}\NormalTok{)}
+\NormalTok{NCAir}\OperatorTok{$}\NormalTok{Date <{-}}\StringTok{ }\KeywordTok{as.Date}\NormalTok{(NCAir}\OperatorTok{$}\NormalTok{Date, }\DataTypeTok{format =} \StringTok{"\%Y{-}\%m{-}\%d"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{time-series-analysis}{%
+\subsection{Time Series Analysis}\label{time-series-analysis}}
+
+Time series are a special class of dataset, where a response variable is
+tracked over time. The frequency of measurement and the timespan of the
+dataset can vary widely. At its most simple, a time series model
+includes an explanatory time component and a response variable. Mixed
+models can include additional explanatory variables (check out the
+\texttt{nlme} and \texttt{lme4} R packages). We will cover a few simple
+applications of time series analysis in these lessons, with references
+for how to take analyses further.
+
+You can add covariates, to explain some other effects on response (mixed
+modeling).
+
+\hypertarget{opportunities}{%
+\subsubsection{Opportunities}\label{opportunities}}
+
+Analysis of time series presents several opportunities. For
+environmental data, some of the most common questions we can answer with
+time series modeling are:
+
+\begin{itemize}
+\tightlist
+\item
+  Has there been an increasing or decreasing \textbf{trend} in the
+  response variable over time?
+\item
+  Can we \textbf{forecast} conditions in the future?
+\end{itemize}
+
+\hypertarget{challenges}{%
+\subsubsection{Challenges}\label{challenges}}
+
+Time series datasets come with several caveats, which need to be
+addressed in order to effectively model the system. A few common
+challenges that arise (and can occur together within a single dataset)
+are:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Autocorrelation}: Data points are not independent from one
+  another (i.e., the measurement at a given time point is dependent on
+  previous time point(s))
+\item
+  \textbf{Data gaps}: Data are not collected at regular intervals,
+  necessitating \emph{interpolation} between measurements.
+\item
+  \textbf{Seasonality}: Cyclic patterns in variables occur at regular
+  intervals, impeding clear interpretation of a monotonic
+  (unidirectional) trend.
+\item
+  \textbf{Heteroscedasticity}: The variance of the time series is not
+  constant over time
+\item
+  \textbf{Covariance}: the covariance of the time series is not constant
+  over time
+\end{itemize}
+
+\hypertarget{example-dataset-eno-river-discharge}{%
+\subsubsection{Example dataset: Eno River
+Discharge}\label{example-dataset-eno-river-discharge}}
+
+River discharge is measured daily at the Eno River gage station. Since
+we are working with one location measured over time, this will make a
+great example dataset for time series analysis.
+
+Let's look at what the dataset contains for mean daily discharge.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{(EnoDischarge, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ datetime, }\DataTypeTok{y =}\NormalTok{ discharge.mean)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom\_line}\NormalTok{() }\OperatorTok{+}
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \StringTok{""}\NormalTok{, }\DataTypeTok{y =} \KeywordTok{expression}\NormalTok{(}\StringTok{"Discharge (ft"}\OperatorTok{\^{}}\DecValTok{3}\OperatorTok{*}\StringTok{"/s)"}\NormalTok{)) }\CommentTok{\# this is daily mean discharge, we have some missing data, its not obvious if we have a clear upward or downward trend, star after 3 means that superscript is finished.}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{14_TimeSeries_files/figure-latex/unnamed-chunk-2-1.pdf}
+
+Notice there are missing data from 1971 to 1985. Gaps this large are
+generally an issue for time series analysis, as we don't have a
+continuous record of data or a good way to characterize any variability
+that happened over those years. We will illustrate a few workarounds to
+address these issues.
+
+Let's start by removing the NAs and splitting the dataset into the early
+and late years.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{EnoDischarge.complete <{-}}\StringTok{ }\NormalTok{EnoDischarge }\OperatorTok{\%>\%}
+\StringTok{  }\KeywordTok{drop\_na}\NormalTok{(discharge.mean) }\CommentTok{\#\#\#\# to remove NA\textquotesingle{}s,we didnt use na.exclude because it removed ALL NA rows}
+
+\NormalTok{EnoDischarge.early <{-}}\StringTok{ }\NormalTok{EnoDischarge.complete }\OperatorTok{\%>\%}
+\StringTok{  }\KeywordTok{filter}\NormalTok{(datetime }\OperatorTok{<}\StringTok{ }\KeywordTok{as.Date}\NormalTok{(}\StringTok{"1985{-}01{-}01"}\NormalTok{)) }\CommentTok{\#\#\#\# separating data before missing data}
+
+\NormalTok{EnoDischarge.late <{-}}\StringTok{ }\NormalTok{EnoDischarge.complete }\OperatorTok{\%>\%}
+\StringTok{  }\KeywordTok{filter}\NormalTok{(datetime }\OperatorTok{>}\StringTok{ }\KeywordTok{as.Date}\NormalTok{(}\StringTok{"1985{-}01{-}01"}\NormalTok{)) }\CommentTok{\#\#\#\# separating data after missing data}
+
+\CommentTok{\#the rows of "early" and "late" adds up to the rows of "complete"}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{decomposing-a-time-series-dataset}{%
+\subsection{Decomposing a time series
+dataset}\label{decomposing-a-time-series-dataset}}
+
+A given time series can be made up of several component series:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  A \textbf{seasonal} component, which repeats over a fixed known period
+  (e.g., seasons of the year, months, days of the week, hour of the day)
+\item
+  A \textbf{trend} component, which quantifies the upward or downward
+  progression over time. The trend component of a time series does not
+  have to be monotonic.
+\item
+  An \textbf{error} or \textbf{random} component, which makes up the
+  remainder of the time series after other components have been
+  accounted for. This component reflects the noise in the dataset.
+\item
+  (optional) A \textbf{cyclical} component, which repeats over periods
+  greater than the seasonal component. A good example of this is El Niño
+  Southern Oscillation (ENSO) cycles, which occur over a period of 2-8
+  years.
+\end{enumerate}
+
+We will decompose the EnoDischarge.late data frame for illustrative
+purposes today. It is possible to run time series analysis on detrended
+data by subtracting the trend component from the data. However,
+detrending must be done carefully, as many environmental data are
+bounded by zero but are not treated as such in a decomposition. If you
+plan to use decomposition to detrend your data, please consult time
+series analysis guides before proceeding.
+
+We first need to turn the discharge data into a time series object in R.
+This is done using the \texttt{ts} function. Notice we can only specify
+one column of data and need to specify the period at which the data are
+sampled. The resulting time series object cannot be viewed like a
+regular data frame.
+
+Note: time series objects must be equispaced. In our case, we have daily
+data with no NAs in the data frame, so we don't need to worry about
+this. We will cover how to address data that are not equispaced later in
+the lesson.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{EnoDischarge.late\_ts <{-}}\StringTok{ }\KeywordTok{ts}\NormalTok{(EnoDischarge.late[[}\DecValTok{8}\NormalTok{]], }\DataTypeTok{frequency =} \DecValTok{365}\NormalTok{) }\CommentTok{\#ts is time series function, 8th column is our discharge mean that we want to work with, doubke square bracker will allow us to just get that column, remember there is also leap year every four years, you could possibly remove feb 29 observations, or have frequency as 365.25, but right now we are not concerned with that}
+\end{Highlighting}
+\end{Shaded}
+
+The \texttt{stl} function decomposes the time series object into its
+component parts. We must specify that the window for seasonal extraction
+is either ``periodic'' or a specific number of at least 7. The
+decomposition proceeds through a loess (locally estimated scatterplot
+smoothing) function.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{?stl }\CommentTok{\#locally estimated scatterplot average (basically like a moving average)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## starting httpd help server ... done
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Generate the decomposition}
+\NormalTok{EnoDischarge.late\_Decomposed <{-}}\StringTok{ }\KeywordTok{stl}\NormalTok{(EnoDischarge.late\_ts, }\DataTypeTok{s.window =} \StringTok{"periodic"}\NormalTok{) }\CommentTok{\# stl only works with time series}
+
+\CommentTok{\# Visualize the decomposed series. }
+\KeywordTok{plot}\NormalTok{(EnoDischarge.late\_Decomposed) }\CommentTok{\# trend is like moving average, period of time when it is higher or lower, time is over 35 years}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{14_TimeSeries_files/figure-latex/unnamed-chunk-5-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# the bar on the right hand size is the relative y{-}axis if you want to compare among plots, remaineder looks very much like data because as you can see from the scale on the right side(bar), the seasonal and trend consistute very little}
+\CommentTok{\# eno river doesnt have a very strong seasonal trend, in this case we have a lot of noise in our signal we know that seasonal componenet is not too big, if it was more cleaner and less noise that means that the strong seasonal component. Seasonal means repeating cycles of how frequently a cycle repeats (the thing that we specified)}
+
+\CommentTok{\# We can extract the components of stl and turn them into data frames}
+\NormalTok{EnoDischarge.late\_Components <{-}}\StringTok{ }\KeywordTok{as.data.frame}\NormalTok{(EnoDischarge.late\_Decomposed}\OperatorTok{$}\NormalTok{time.series[,}\DecValTok{1}\OperatorTok{:}\DecValTok{3}\NormalTok{])}
+\NormalTok{EnoDischarge.late\_Components <{-}}\StringTok{ }\KeywordTok{mutate}\NormalTok{(EnoDischarge.late\_Components,}
+                      \DataTypeTok{Observed =}\NormalTok{ EnoDischarge.late}\OperatorTok{$}\NormalTok{discharge.mean, }\CommentTok{\# adding actual data     }
+                      \DataTypeTok{Date =}\NormalTok{ EnoDischarge.late}\OperatorTok{$}\NormalTok{datetime) }\CommentTok{\# adding date to our time series components}
+
+\CommentTok{\# Visualize how the trend maps onto the data}
+\KeywordTok{ggplot}\NormalTok{(EnoDischarge.late\_Components) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom\_line}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{y =}\NormalTok{ Observed, }\DataTypeTok{x =}\NormalTok{ Date),  }\DataTypeTok{size =} \FloatTok{0.25}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom\_line}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{y =}\NormalTok{ trend, }\DataTypeTok{x =}\NormalTok{ Date), }\DataTypeTok{color =} \StringTok{"\#c13d75ff"}\NormalTok{, }\DataTypeTok{size =} \FloatTok{1.25}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom\_hline}\NormalTok{(}\DataTypeTok{yintercept =} \DecValTok{0}\NormalTok{, }\DataTypeTok{lty =} \DecValTok{2}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{ylab}\NormalTok{(}\KeywordTok{expression}\NormalTok{(}\StringTok{"Discharge (ft"}\OperatorTok{\^{}}\DecValTok{3}\OperatorTok{*}\StringTok{"/s)"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{14_TimeSeries_files/figure-latex/unnamed-chunk-5-2.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Visualize how the seasonal cycle maps onto the data}
+\KeywordTok{ggplot}\NormalTok{(EnoDischarge.late\_Components) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom\_line}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{y =}\NormalTok{ Observed, }\DataTypeTok{x =}\NormalTok{ Date),  }\DataTypeTok{size =} \FloatTok{0.25}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom\_line}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{y =}\NormalTok{ seasonal, }\DataTypeTok{x =}\NormalTok{ Date), }\DataTypeTok{color =} \StringTok{"\#c13d75ff"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom\_hline}\NormalTok{(}\DataTypeTok{yintercept =} \DecValTok{0}\NormalTok{, }\DataTypeTok{lty =} \DecValTok{2}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{ylab}\NormalTok{(}\KeywordTok{expression}\NormalTok{(}\StringTok{"Discharge (ft"}\OperatorTok{\^{}}\DecValTok{3}\OperatorTok{*}\StringTok{"/s)"}\NormalTok{)) }\CommentTok{\#\#\# ooo the seasonal compnenet is dipping below zero.Stl doesnt care what the actual data bounds ar, it just gives what it is (seasonal component should not go negative), so seasonal component might not be useful to visualize}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{14_TimeSeries_files/figure-latex/unnamed-chunk-5-3.pdf}
+
+Note that the decomposition can yield negative values when we apply a
+seasonal adjustment or a trend adjustment to the data. The decomposition
+is not constrained by a lower bound of zero as discharge is in real
+life. Make sure to interpret with caution!
+
+\hypertarget{trend-analysis}{%
+\subsection{Trend analysis}\label{trend-analysis}}
+
+Two types of trends may be present in our time series dataset:
+\textbf{monotonic} or \textbf{step}. Monotonic trends are a gradual
+shift over time that is consistent in direction, for example in response
+to land use change (gradual change). Step trends are a distinct shift at
+a given time point, for example in response to a policy being enacted.
+
+\hypertarget{step-trend-analysis}{%
+\subsubsection{Step trend analysis}\label{step-trend-analysis}}
+
+Step trend analysis works well for upstream/downstream and before/after
+study design. We will not delve into each of these methods during class,
+but specific tests are listed below for future reference. Step trends
+might be response to somthing big like a policy change.
+
+Note: ALWAYS look into the assumptions of a given test to ensure it
+matches with your data and with your research question.
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Change point detection}, e.g., \texttt{pettitt.test} (package:
+  trend), \texttt{breakpoints} (package: strucchange),
+  \texttt{chngpt.test} (package: chngpt), multiple tests in package:
+  changepoint. If there is a sudden change in slope of trend, it helps
+  to identify what is the actual time that slope of trend changed.
+\item
+  \textbf{t-test (paired or unpaired)} (for example, before and after)
+\item
+  \textbf{Kruskal-Wallis test}: non-parametric version of t-test
+\item
+  \textbf{ANCOVA}, analysis of covariance
+\end{itemize}
+
+\hypertarget{example-step-trend-analysis}{%
+\paragraph{Example: step trend
+analysis}\label{example-step-trend-analysis}}
+
+Let's say we wanted to know whether discharge was higher in the early
+period or the late period. Perhaps there was a change in the methodology
+of streamflow measurement between the two periods or climate effects or
+land use change that caused a differene in the magnitude of measured
+discharge?
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{EnoDischarge.early.subsample <{-}}\StringTok{ }\KeywordTok{sample\_n}\NormalTok{(EnoDischarge.early, }\DecValTok{5000}\NormalTok{) }\CommentTok{\# subsampling for normality test}
+\NormalTok{EnoDischarge.late.subsample <{-}}\StringTok{ }\KeywordTok{sample\_n}\NormalTok{(EnoDischarge.late, }\DecValTok{5000}\NormalTok{)}
+
+\KeywordTok{shapiro.test}\NormalTok{(EnoDischarge.early.subsample}\OperatorTok{$}\NormalTok{discharge.mean) }\CommentTok{\# for normality assumption of a t{-}test, null hypothesis is that is is normally distributed. but because our p{-}value is low, we reject it, that means that it is not normal.}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##  Shapiro-Wilk normality test
+## 
+## data:  EnoDischarge.early.subsample$discharge.mean
+## W = 0.35936, p-value < 2.2e-16
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{shapiro.test}\NormalTok{(EnoDischarge.late.subsample}\OperatorTok{$}\NormalTok{discharge.mean)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##  Shapiro-Wilk normality test
+## 
+## data:  EnoDischarge.late.subsample$discharge.mean
+## W = 0.31834, p-value < 2.2e-16
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{var.test}\NormalTok{(EnoDischarge.early}\OperatorTok{$}\NormalTok{discharge.mean, EnoDischarge.late}\OperatorTok{$}\NormalTok{discharge.mean) }\CommentTok{\#early vs late mean discharge, we have totally different variances, so we violated both the tests}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##  F test to compare two variances
+## 
+## data:  EnoDischarge.early$discharge.mean and EnoDischarge.late$discharge.mean
+## F = 0.80003, num df = 16076, denom df = 12504, p-value < 2.2e-16
+## alternative hypothesis: true ratio of variances is not equal to 1
+## 95 percent confidence interval:
+##  0.7739912 0.8268842
+## sample estimates:
+## ratio of variances 
+##          0.8000284
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{wilcox.test}\NormalTok{(EnoDischarge.early}\OperatorTok{$}\NormalTok{discharge.mean, EnoDischarge.late}\OperatorTok{$}\NormalTok{discharge.mean) }\CommentTok{\# they are significantly different, lets see how to represent them graphically, wilcoxon test didnt tell us which one is higher, so we can use summary function}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##  Wilcoxon rank sum test with continuity correction
+## 
+## data:  EnoDischarge.early$discharge.mean and EnoDischarge.late$discharge.mean
+## W = 1.17e+08, p-value < 2.2e-16
+## alternative hypothesis: true location shift is not equal to 0
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(EnoDischarge.early}\OperatorTok{$}\NormalTok{discharge.mean)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##    0.09   13.00   27.00   61.84   57.00 4570.00
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(EnoDischarge.late}\OperatorTok{$}\NormalTok{discharge.mean)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##    0.02    5.70   19.00   56.43   49.20 4600.00
+\end{verbatim}
+
+How might you interpret the results of this test, and how might you
+represent them graphically?
+
+\begin{quote}
+Mean daily discharge in the Eno RIver from 1927-1971 was significantly
+higher than mean daily discharge from 1985-2019 (Wilcoxon test, W =
+1.17*10\^{}8, p\textless0.0001). To represent them graphically, you
+could do a boxplot, density plot, violin plot etc.
+\end{quote}
+
+\hypertarget{monotonic-trend-analysis}{%
+\subsubsection{Monotonic trend
+analysis}\label{monotonic-trend-analysis}}
+
+In general, detecting a monotonic trend requires a long sequence of data
+with few gaps. If we are working with monthly data, a time series of at
+least five years is recommended. Gaps can be accounted for, but a gap
+that makes up more than 1/3 of the sampling period is generally
+considered the threshold for considering a gap to be too long (a step
+trend analysis might be better in this situation).
+
+Adjusting the data may be necessary to fulfill the assumptions of a
+trend test. These adjustments include \textbf{aggregation},
+\textbf{subsampling}, and \textbf{interpolation}. What do each of these
+mean, and why might we want to use them?
+
+\begin{quote}
+aggregation: take months and compile into a yearly data (could be mean,
+sum or median). eg if you have 28 days and missing data for 2 days, you
+can summarize across a dataset.
+\end{quote}
+
+\begin{quote}
+subsampling: lets say you have a daily data and you take first point of
+each month as a monthly representive (to minimize so many data points).
+Subsampling is used the least in time series.
+\end{quote}
+
+\begin{quote}
+interpolation: predicting values for data gaps from existing data.
+\end{quote}
+
+Common interpolation methods:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Piecewise constant}: also known as a ``nearest neighbor''
+  approach. Any missing data are assumed to be equal to the measurement
+  made nearest to that date (could be earlier or later).
+\item
+  \textbf{Linear}: could be thought of as a ``connect the dots''
+  approach. Any missing data are assumed to fall between the previous
+  and next measurement, with a straight line drawn between the known
+  points determining the values of the interpolated data on any given
+  date.
+\item
+  \textbf{Spline}: similar to a linear interpolation except that a
+  quadratic function is used to interpolate rather than drawing a
+  straight line.
+\end{itemize}
+
+\hypertarget{example-interpolation}{%
+\paragraph{Example: interpolation}\label{example-interpolation}}
+
+The Eno River discharge data doesn't have any short periods of missing
+data, so interpolation would not be a good choice for that dataset. We
+will illustrate a linear interpolation of the NC Air quality dataset
+below.
+
+In this case, several sites have a lot of missing data, and several
+sites monitor most days with few missing data points.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{NCOzone <{-}}
+\KeywordTok{ggplot}\NormalTok{(NCAir, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ Date, }\DataTypeTok{y =}\NormalTok{ Ozone)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom\_point}\NormalTok{() }\OperatorTok{+}
+\StringTok{  }\KeywordTok{facet\_wrap}\NormalTok{(}\KeywordTok{vars}\NormalTok{(Site.Name))}
+\KeywordTok{print}\NormalTok{(NCOzone) }\CommentTok{\# it doesnt make sense to interpolate for the data gaps, and it might estimate that airquality is constant but for some data we can see that there is a dip.}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: Removed 2146 rows containing missing values (geom_point).
+\end{verbatim}
+
+\includegraphics{14_TimeSeries_files/figure-latex/unnamed-chunk-7-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{NCPM2}\FloatTok{.5}\NormalTok{ <{-}}
+\KeywordTok{ggplot}\NormalTok{(NCAir, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ Date, }\DataTypeTok{y =}\NormalTok{ PM2}\FloatTok{.5}\NormalTok{)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom\_point}\NormalTok{() }\OperatorTok{+}
+\StringTok{  }\KeywordTok{facet\_wrap}\NormalTok{(}\KeywordTok{vars}\NormalTok{(Site.Name))}
+\KeywordTok{print}\NormalTok{(NCPM2}\FloatTok{.5}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: Removed 1054 rows containing missing values (geom_point).
+\end{verbatim}
+
+\includegraphics{14_TimeSeries_files/figure-latex/unnamed-chunk-7-2.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(NCAir}\OperatorTok{$}\NormalTok{Site.Name) }\CommentTok{\# if we add 365+365 there should be 730 samples. ONly two schools have 730 samples}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##          Bryson City         Castle Hayne      Clemmons Middle 
+##                  724                  677                  730 
+##        Durham Armory  Frying Pan Mountain Garinger High School 
+##                  722                  556                  722 
+##        Hattie Avenue              Leggett       Linville Falls 
+##                  730                  717                  545 
+##    Mendenhall School     Millbrook School    Pitt Agri. Center 
+##                  716                  724                  697 
+##    West Johnston Co. 
+##                  716
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{NCAir.Garinger <{-}}\StringTok{ }\NormalTok{NCAir }\OperatorTok{\%>\%}
+\StringTok{  }\KeywordTok{filter}\NormalTok{(Site.Name }\OperatorTok{==}\StringTok{ "Garinger High School"}\NormalTok{)}
+
+\NormalTok{GaringerOzone <{-}}
+\KeywordTok{ggplot}\NormalTok{(NCAir.Garinger, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ Date, }\DataTypeTok{y =}\NormalTok{ Ozone)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom\_point}\NormalTok{() }
+\KeywordTok{print}\NormalTok{(GaringerOzone) }\CommentTok{\# it looks like it is good complete dataset but we do have 8 missing days}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: Removed 5 rows containing missing values (geom_point).
+\end{verbatim}
+
+\includegraphics{14_TimeSeries_files/figure-latex/unnamed-chunk-7-3.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# na.approx function fills in NAs with a linear interpolation}
+\CommentTok{\# Spline interpolation can also be specified as an alternative}
+\CommentTok{\# Piecewise constant interpolation can be done with na.aggregate}
+\CommentTok{\# we will not piecewise today because our data has seasonality so we do not expect it to be a straight line}
+\NormalTok{NCAir.Garinger}\OperatorTok{$}\NormalTok{Ozone <{-}}\StringTok{ }\KeywordTok{na.approx}\NormalTok{(NCAir.Garinger}\OperatorTok{$}\NormalTok{Ozone) }\CommentTok{\# if there were 2 missing points, it would fill the first point closer to the lower value and 2nd point closer to the upper value}
+\NormalTok{NCAir.Garinger}\OperatorTok{$}\NormalTok{PM2}\FloatTok{.5}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{na.approx}\NormalTok{(NCAir.Garinger}\OperatorTok{$}\NormalTok{PM2}\FloatTok{.5}\NormalTok{)}
+
+\NormalTok{GaringerOzone.interpolated <{-}}
+\KeywordTok{ggplot}\NormalTok{(NCAir.Garinger, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ Date, }\DataTypeTok{y =}\NormalTok{ Ozone)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom\_point}\NormalTok{() }
+\KeywordTok{print}\NormalTok{(GaringerOzone.interpolated)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{14_TimeSeries_files/figure-latex/unnamed-chunk-7-4.pdf}
+
+\hypertarget{monotonic-trend-analysis-continued}{%
+\subsubsection{Monotonic trend analysis,
+continued}\label{monotonic-trend-analysis-continued}}
+
+Specific tests for monotonic trend analysis are listed below, with
+assumptions and tips:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{linear regression}: no seasonality, fits the assumptions of a
+  parametric test. Function: \texttt{lm}
+\item
+  \textbf{Mann-Kendall}: no seasonality, non-parametric, no temporal
+  autocorrelation (data closer to ecah other correlate with each other
+  more), missing data allowed. Function: \texttt{mk.test} (package:
+  trend)
+\item
+  \textbf{modified Mann-Kendall}: no seasonality, non-parametric,
+  accounts for temporal autocorrelation, missing data allowed. Function:
+  \texttt{mmky} and \texttt{mmkh} (package: modifiedmk)
+\item
+  \textbf{Seasonal Mann-Kendall}: seasonality, non-parametric, no
+  temporal autocorelation, identical distribution. Function:
+  \texttt{smk.test} (package: trend)
+\end{itemize}
+
+The packages trend, Kendall, and modifiedmk also include other
+modifications to monotonic trend tests. Look into the documentation for
+these packages if you are applying a special case.
+
+If covariates (another predictor variable) are included in the dataset,
+additional tests are recommended. A great resource for trend testing for
+water quality monitoring, which includes guidance on these cases, has
+been prepared by the Environmental Protection Agency:
+\url{https://www.epa.gov/sites/production/files/2016-05/documents/tech_notes_6_dec2013_trend.pdf}.
+This would likely be useful for other types of environmental data too.
+
+\hypertarget{example-monotonic-trend-analysis}{%
+\paragraph{Example: monotonic trend
+analysis}\label{example-monotonic-trend-analysis}}
+
+Remember that we noticed in the decomposition that the Eno River
+discharge data has a seasonal cycle (despite high random variability).
+We might be interested in knowing how (if) discharge has changed over
+the course of measurement while incorporating the seasonal component. In
+this case, we will use a Seasonal Mann-Kendall test to figure out
+whether a monotonic trend exists. We will use the late dataset again.
+
+The Seasonal Mann-Kendall assumes no temporal autocorrelation, but we
+know that daily data is prone to temporal autocorrelation. In this case,
+we may want to collapse our data down into monthly data so that we can
+(1) reduce temporal autocorrelation and (2) break down the potential
+seasonal trend into more interpretable components.
+
+We will calculate the mean monthly discharge for this dataset, rather
+than calculating the total monthly discharge or subsampling a given day
+in each month. Why did we make this decision?
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{EnoDischarge.late.monthly <{-}}\StringTok{ }\NormalTok{EnoDischarge.late }\OperatorTok{\%>\%}
+\StringTok{  }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{Year =} \KeywordTok{year}\NormalTok{(datetime), }
+         \DataTypeTok{Month =} \KeywordTok{month}\NormalTok{(datetime)) }\OperatorTok{\%>\%}
+\StringTok{  }\KeywordTok{group\_by}\NormalTok{(Year, Month) }\OperatorTok{\%>\%}\StringTok{ }\CommentTok{\# the only new column we will see is the months that you group by and the what you have in summarize below.}
+\StringTok{  }\KeywordTok{summarise}\NormalTok{(}\DataTypeTok{Discharge =} \KeywordTok{mean}\NormalTok{(discharge.mean)) }\CommentTok{\#why did she use mean, coz mean will account for outliers, if you would sum individual days, feb will have less sum than march just because it has less days}
+  
+\NormalTok{EnoDischarge.late.monthly}\OperatorTok{$}\NormalTok{Date <{-}}\StringTok{ }\KeywordTok{as.Date}\NormalTok{(}\KeywordTok{paste}\NormalTok{(EnoDischarge.late.monthly}\OperatorTok{$}\NormalTok{Year, }
+\NormalTok{                                                EnoDischarge.late.monthly}\OperatorTok{$}\NormalTok{Month, }
+                                                \DecValTok{1}\NormalTok{, }\DataTypeTok{sep=}\StringTok{"{-}"}\NormalTok{), }\CommentTok{\#value of 1 indicating the day is.}
+                                          \DataTypeTok{format =} \StringTok{"\%Y{-}\%m{-}\%d"}\NormalTok{) }\CommentTok{\# we are doing that just to graph properly as a date.}
+
+\CommentTok{\# Generate time series (smk.test needs ts, not data.frame)}
+\NormalTok{EnoDischarge.late.monthly.ts <{-}}\StringTok{ }\KeywordTok{ts}\NormalTok{(EnoDischarge.late.monthly}\OperatorTok{$}\NormalTok{Discharge, }\DataTypeTok{frequency =} \DecValTok{12}\NormalTok{, }
+                        \DataTypeTok{start =} \KeywordTok{c}\NormalTok{(}\DecValTok{1985}\NormalTok{, }\DecValTok{10}\NormalTok{, }\DecValTok{1}\NormalTok{), }\DataTypeTok{end =} \KeywordTok{c}\NormalTok{(}\DecValTok{2019}\NormalTok{, }\DecValTok{12}\NormalTok{, }\DecValTok{1}\NormalTok{)) }\CommentTok{\# we mentioned this because our time series starts from october}
+\CommentTok{\# Run SMK test}
+\NormalTok{EnoDischarge.late.trend <{-}}\StringTok{ }\KeywordTok{smk.test}\NormalTok{(EnoDischarge.late.monthly.ts)}
+
+\CommentTok{\# Inspect results}
+\NormalTok{EnoDischarge.late.trend }\CommentTok{\# is there monotonic trend over time, is it positive or negative, null is there is no monotonic trend and altternative is that there is, either positive or negative, we can interpret both an overall trend and a specific seasonal trend (below with summary)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##  Seasonal Mann-Kendall trend test (Hirsch-Slack test)
+## 
+## data:  EnoDischarge.late.monthly.ts
+## z = -0.13967, p-value = 0.8889
+## alternative hypothesis: true S is not equal to 0
+## sample estimates:
+##     S  varS 
+##   -34 55828
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(EnoDischarge.late.trend) }\CommentTok{\# in case january was significant, we will interpret it like this, there was no overall significnace but there was an significant increase in discharge for the month of January. This is about trend across seasons. Do not report \textquotesingle{}s\textquotesingle{}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##  Seasonal Mann-Kendall trend test (Hirsch-Slack test)
+## 
+## data: EnoDischarge.late.monthly.ts
+## alternative hypothesis: two.sided
+## 
+## Statistics for individual seasons
+## 
+## H0
+##                      S   varS    tau      z Pr(>|z|)  
+## Season 1:   S = 0  -91 4550.3 -0.162 -1.334  0.18214  
+## Season 2:   S = 0  -69 4550.3 -0.123 -1.008  0.31342  
+## Season 3:   S = 0  -85 4550.3 -0.152 -1.245  0.21304  
+## Season 4:   S = 0  -21 4550.3 -0.037 -0.296  0.76686  
+## Season 5:   S = 0   59 4550.3  0.105  0.860  0.38989  
+## Season 6:   S = 0  101 4550.3  0.180  1.482  0.13822  
+## Season 7:   S = 0   71 4550.3  0.127  1.038  0.29940  
+## Season 8:   S = 0   29 4550.3  0.052  0.415  0.67808  
+## Season 9:   S = 0   21 4550.3  0.037  0.296  0.76686  
+## Season 10:   S = 0  15 4958.3  0.025  0.199  0.84240  
+## Season 11:   S = 0 -63 4958.3 -0.106 -0.880  0.37859  
+## Season 12:   S = 0  -1 4958.3 -0.002  0.000  1.00000  
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{EnoDischarge.monthly <{-}}
+\KeywordTok{ggplot}\NormalTok{(EnoDischarge.late.monthly, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ Date, }\DataTypeTok{y =}\NormalTok{ Discharge)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom\_point}\NormalTok{() }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom\_line}\NormalTok{()}
+\KeywordTok{print}\NormalTok{(EnoDischarge.monthly)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{14_TimeSeries_files/figure-latex/unnamed-chunk-8-1.pdf}
+
+What would we conclude based on these findings?
+
+\begin{quote}
+There is no significant overall trend in our data set. The discharge
+does not vary with respect to a seasonal component (p = \textbf{, z =
+}\_\_\_\_\_\_).
+\end{quote}
+
+If a significant trend was present, we could compute a \textbf{Sen's
+Slope} to quantify that trend (\texttt{sens.slope} function in the trend
+package).
+
+\hypertarget{forecasting-with-autoregressive-and-moving-average-models-arma}{%
+\subsection{Forecasting with Autoregressive and Moving Average Models
+(ARMA)}\label{forecasting-with-autoregressive-and-moving-average-models-arma}}
+
+We might be interested in characterizing a time series in order to
+understand what happened in the past and to effectively forecast into
+the future. Two common models that can approximate time series are
+\textbf{autoregressive} and \textbf{moving average} models. To classify
+these models, we use the \textbf{ACF (autocorrelation function)} and the
+\textbf{PACF (partial autocorrelation function)}, which correspond to
+the autocorrelation of a series and the correlation of the residuals,
+respectively.
+
+\textbf{Autoregressive} models operate under the framework that a given
+measurements is correlated with previous measurements. For example, an
+AR1 formulation dictates that a measurement is dependent on the previous
+measurement, and the value can be predicted by quantifying the lag.
+
+\textbf{Moving average} models operate under the framework that the
+covariance between a measurement and the previous measurement is zero.
+While AR models use past forecast \emph{values} to predict future
+values, MA models use past forecast \emph{errors} to predict future
+values.
+
+Here are some great resources for examining ACF and PACF lags under
+different formulations of AR and MA models.
+\url{https://nwfsc-timeseries.github.io/atsa-labs/sec-tslab-autoregressive-ar-models.html}
+\url{https://nwfsc-timeseries.github.io/atsa-labs/sec-tslab-moving-average-ma-models.html}
+
+ARMA models require stationary data. This means that there is no
+monotonic trend over time and there is also equal variance and
+covariance across the time series. The function \texttt{adf.test} will
+determine whether our data are stationary. The null hypothesis is that
+the data are not stationary, so we infer that the data are stationary if
+the p-value is \textless{} 0.05.
+
+While some processes might be easy to identify, it is often complicated
+to predict the order of AR and MA processes when the operate in the same
+dataset. To get around this issue, it is often necessary to run multiple
+potential formulations of the model and see which one results in the
+most parsimonious fit using AIC. The function \texttt{auto.arima} does
+this automatically.
+
+\end{document}
