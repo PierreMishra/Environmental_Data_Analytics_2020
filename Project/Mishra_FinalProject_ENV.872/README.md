@@ -1,16 +1,10 @@
 # US Dam Safety and Climate Change
 
-<General notes: add as much information as is relevant for your repository. Some overarching guidelines are provided, but feel free to expand on these guidelines.>
-<More resources found here: https://www.dataone.org/all-best-practices>
-<Delete the text inside the brackets when formatting your file.>
-
 ## Summary
 
 This repository contains the files pertaining to the hydrologic analysis of dams and their safety in US and specifically, North Carolina. Despite their socio-economic benefits, dams are prone to failure which can cause massive loss of life and property. According to the National Inventory of Dams (NID), currently, there are 14,254 dams that are classified as having high risk of failure. Therefore, my first goal is to study the variables related to dams that can affect their classification of failure risk. For such purpose, I use the 2019 National Inventory of Dams dataset released by the US Army Corps of Engineers. 
 
 Moreover, I also plan to investigate the effect of precipitation and/or discharge on dam failure risk. Climate Change is increasing frequency of heaviest precipitation events across the US that can stress the physical structure of dams. For such purpose, I use USGS North Carolina stream gage data for the period of record in order to determine hydrologic trends.
-
-<describe the purpose of this repository, the information it contains, and any relevant analysis goals. What, why, where, when, how?>
 
 ## Investigators
 
